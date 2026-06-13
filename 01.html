@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Growth Core Diagram</title>
+  <!-- Google Fonts for premium typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* CSS Variables for design tokens */
+    :root {
+      --bg-color: #fafafa;
+      --text-main: #18181b;
+      --text-secondary: #71717a;
+      --line-color: #d4d4d8;
+      --line-color-active: #3b82f6;
+      
+      /* Badges */
+      --badge-dark-bg: #18181b;
+      --badge-dark-text: #ffffff;
+      --badge-dark-border: rgba(255, 255, 255, 0.1);
+      --badge-dark-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      
+      --badge-light-bg: #ffffff;
+      --badge-light-text: #27272a;
+      --badge-light-border: #e4e4e7;
+      --badge-light-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+      
+      --highlight-shadow: 0 0 20px rgba(59, 130, 246, 0.35);
+      --dot-color: #18181b;
+      --font-family: 'Plus Jakarta Sans', sans-serif;
+      
+      --bg-gradient: radial-gradient(circle at 50% 50%, #ffffff 0%, #f4f4f5 100%);
+      --toggle-bg: #ffffff;
+      --toggle-border: #e4e4e7;
+    }
+
+    body.dark {
+      --bg-color: #09090b;
+      --text-main: #f4f4f5;
+      --text-secondary: #a1a1aa;
+      --line-color: #27272a;
+      --line-color-active: #38bdf8;
+      
+      /* Badges */
+      --badge-dark-bg: #18181b;
+      --badge-dark-text: #ffffff;
+      --badge-dark-border: rgba(255, 255, 255, 0.15);
+      --badge-dark-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      
+      --badge-light-bg: rgba(24, 24, 27, 0.85);
+      --badge-light-text: #e4e4e7;
+      --badge-light-border: #27272a;
+      --badge-light-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      
+      --highlight-shadow: 0 0 25px rgba(56, 189, 248, 0.45);
+      --dot-color: #f4f4f5;
+      
+      --bg-gradient: radial-gradient(circle at 50% 50%, #18181b 0%, #09090b 100%);
+      --toggle-bg: #18181b;
+      --toggle-border: #27272a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.5s cubic-bezier(0.4, 0, 0.2, 1), color 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow-x: hidden;
+      padding: 40px 20px;
+      position: relative;
+    }
+
+    /* Controls header */
+    .header-controls {
+      position: absolute;
+      top: 32px;
+      right: 32px;
+      display: flex;
+      gap: 12px;
+      z-index: 10;
+    }
+
+    .theme-toggle-btn {
+      background: var(--toggle-bg);
+      border: 1px solid var(--toggle-border);
+      color: var(--text-main);
+      padding: 10px 20px;
+      border-radius: 30px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      user-select: none;
+    }
+
+    .theme-toggle-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Diagram Wrapper - Container Query Parent */
+    .diagram-wrapper {
+      container-type: inline-size;
+      width: 100%;
+      max-width: 1280px;
+      aspect-ratio: 1000 / 520;
+      position: relative;
+      margin: 0 auto;
+    }
+
+    /* SVG overlay for paths and lines */
+    .diagram-svg {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+    }
+
+    .diagram-line {
+      stroke: var(--line-color);
+      stroke-width: 1.5;
+      stroke-dasharray: 5 5;
+      fill: none;
+      transition: stroke 0.4s cubic-bezier(0.4, 0, 0.2, 1), stroke-width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Highlight class triggered by JS on hover */
+    .diagram-line.highlight {
+      stroke: var(--line-color-active);
+      stroke-width: 2.25;
+      stroke-dasharray: 7 4;
+      animation: line-flow 1.5s linear infinite;
+    }
+
+    @keyframes line-flow {
+      to {
+        stroke-dashoffset: -20;
+      }
+    }
+
+    /* Opportunity & Scale Dots */
+    .diagram-dot {
+      fill: var(--dot-color);
+      transition: fill 0.4s cubic-bezier(0.4, 0, 0.2, 1), r 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .diagram-dot.highlight {
+      fill: var(--line-color-active);
+      r: 8;
+    }
+
+    /* HTML Badges positioned relative to coordinate space */
+    .badge {
+      position: absolute;
+      left: calc(var(--x) / 1000 * 100%);
+      top: calc(var(--y) / 520 * 100%);
+      transform: translate(-50%, -50%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(6px, 0.8cqw, 10px);
+      white-space: nowrap;
+      border-radius: 50px;
+      font-weight: 500;
+      font-size: clamp(11px, 1.4cqw, 15px);
+      padding: clamp(6px, 0.9cqw, 10px) clamp(8px, 1.2cqw, 14px);
+      transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+      cursor: pointer;
+      user-select: none;
+      z-index: 2;
+    }
+
+    /* Dark Badges Style */
+    .badge-dark {
+      background: var(--badge-dark-bg);
+      color: var(--badge-dark-text);
+      border: 1px solid var(--badge-dark-border);
+      box-shadow: var(--badge-dark-shadow);
+    }
+
+    /* Light Badges Style */
+    .badge-light {
+      background: var(--badge-light-bg);
+      color: var(--badge-light-text);
+      border: 1px solid var(--badge-light-border);
+      box-shadow: var(--badge-light-shadow);
+    }
+
+    /* Hover States for Badges */
+    .badge:hover {
+      transform: translate(-50%, -50%) scale(1.04);
+      z-index: 5;
+    }
+
+    .badge-dark:hover {
+      box-shadow: var(--highlight-shadow), var(--badge-dark-shadow);
+      border-color: var(--line-color-active);
+    }
+
+    .badge-light:hover {
+      box-shadow: var(--highlight-shadow), var(--badge-light-shadow);
+      border-color: var(--line-color-active);
+    }
+
+    /* Badge Icons styling */
+    .badge-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: clamp(12px, 1.6cqw, 18px);
+      height: clamp(12px, 1.6cqw, 18px);
+      flex-shrink: 0;
+    }
+
+    /* Custom CSS rounded shape icons */
+    .icon-green-square {
+      width: 100%;
+      height: 100%;
+      background: #86efac;
+      border-radius: 3px;
+    }
+    
+    .icon-green-circle {
+      width: 85%;
+      height: 85%;
+      background: #22c55e;
+      border-radius: 50%;
+    }
+
+    .icon-purple-square {
+      width: 100%;
+      height: 100%;
+      background: #c084fc;
+      border-radius: 3px;
+    }
+
+    /* Center Header Text Layout */
+    .center-header {
+      position: absolute;
+      left: 50%;
+      top: calc(var(--y) / 520 * 100%);
+      transform: translate(-50%, -50%);
+      text-align: center;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .center-header h1 {
+      font-size: clamp(16px, 2.5cqw, 26px);
+      font-weight: 500;
+      line-height: 1.25;
+      letter-spacing: -0.01em;
+      color: var(--text-main);
+      transition: color 0.4s ease;
+    }
+
+    /* Opportunity & Scale Text styling */
+    .axis-label {
+      position: absolute;
+      top: 50%;
+      font-weight: 500;
+      font-size: clamp(12px, 1.6cqw, 16px);
+      color: var(--text-main);
+      transition: color 0.4s ease;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    .axis-label-left {
+      left: calc(115 / 1000 * 100%);
+      transform: translate(-100%, -50%);
+      margin-left: -14px;
+      text-align: right;
+    }
+
+    .axis-label-right {
+      left: calc(885 / 1000 * 100%);
+      transform: translate(0, -50%);
+      margin-left: 14px;
+      text-align: left;
+    }
+
+    /* Media queries to fine-tune layout on smaller screens */
+  </style>
+</head>
+<body>
+    <!-- Controls Header -->
+    <div class="header-controls">
+      <button class="theme-toggle-btn" id="themeToggle">
+        <!-- Sun Icon -->
+        <svg id="sunIcon" class="theme-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+          <circle cx="12" cy="12" r="4"></circle>
+          <path d="M12 2v2"></path>
+          <path d="M12 20v2"></path>
+          <path d="M4.93 4.93l1.41 1.41"></path>
+          <path d="M17.66 17.66l1.41 1.41"></path>
+          <path d="M2 12h2"></path>
+          <path d="M20 12h2"></path>
+          <path d="M6.34 17.66l-1.41 1.41"></path>
+          <path d="M19.07 4.93l-1.41 1.41"></path>
+        </svg>
+        <!-- Moon Icon -->
+        <svg id="moonIcon" class="theme-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+        </svg>
+        <span id="toggleText">Dark Mode</span>
+      </button>
+    </div>
+
+    <!-- The Diagram Wrapper -->
+    <div class="diagram-wrapper">
+      
+      <!-- SVG Lines and Tracks Background -->
+      <svg class="diagram-svg" viewBox="0 0 1000 520">
+        <!-- Main Horizontal Axis -->
+        <line class="diagram-line line-horizontal" x1="115" y1="275" x2="885" y2="275" />
+
+        <!-- Concentric Circles -->
+        <!-- Inner Circle R=125 -->
+        <circle class="diagram-line circle-inner" cx="500" cy="275" r="125" />
+        <!-- Outer Circle R=230 -->
+        <circle class="diagram-line circle-outer" cx="500" cy="275" r="230" />
+
+        <!-- Opportunity & Scale Endpoints -->
+        <circle class="diagram-dot dot-opportunity" cx="115" cy="275" r="5.5" />
+        <circle class="diagram-dot dot-scale" cx="885" cy="275" r="5.5" />
+      </svg>
+
+      <!-- Opportunity & Scale Labels -->
+      <div class="axis-label axis-label-left">Opportunity</div>
+      <div class="axis-label axis-label-right">Scale</div>
+
+      <!-- Center Title -->
+      <div class="center-header" style="--y: 85;">
+        <h1>The Growth<br>Core</h1>
+      </div>
+
+      <!-- ================== BADGES ================== -->
+
+      <!-- Inner Circle Badges (Dark) -->
+      
+      <!-- Website Design -->
+      <div class="badge badge-dark" style="--x: 500; --y: 200;" data-target-circle="inner">
+        <span class="badge-icon">
+          <span class="icon-green-square"></span>
+        </span>
+        Website Design
+      </div>
+
+      <!-- AI Search -->
+      <div class="badge badge-dark" style="--x: 395; --y: 245;" data-target-circle="inner">
+        <span class="badge-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5">
+            <path d="M12 2L15 9L22 12L15 15L12 22L9 15L2 12L9 9Z" fill="#60a5fa"/>
+          </svg>
+        </span>
+        AI Search
+      </div>
+
+      <!-- SEO -->
+      <div class="badge badge-dark" style="--x: 605; --y: 245;" data-target-circle="inner">
+        <span class="badge-icon">
+          <span class="icon-green-circle"></span>
+        </span>
+        SEO
+      </div>
+
+      <!-- Meta Ads -->
+      <div class="badge badge-dark" style="--x: 335; --y: 310;" data-target-circle="inner">
+        <span class="badge-icon">
+          <svg viewBox="0 0 24 24" fill="#f472b6">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+          </svg>
+        </span>
+        Meta Ads
+      </div>
+
+      <!-- Conversion Optimization -->
+      <div class="badge badge-dark" style="--x: 500; --y: 310;" data-target-circle="inner">
+        <span class="badge-icon">
+          <svg viewBox="0 0 24 24" fill="#fb923c">
+            <polygon points="12,2 22,7.5 22,18.5 12,24 2,18.5 2,7.5" />
+          </svg>
+        </span>
+        Conversion Optimization
+      </div>
+
+      <!-- Automation -->
+      <div class="badge badge-dark" style="--x: 665; --y: 310;" data-target-circle="inner">
+        <span class="badge-icon">
+          <svg viewBox="0 0 24 24" fill="#86efac">
+            <polygon points="6,4 20,12 6,20" />
+          </svg>
+        </span>
+        Automation
+      </div>
+
+      <!-- Google Ads -->
+      <div class="badge badge-dark" style="--x: 405; --y: 375;" data-target-circle="inner">
+        <span class="badge-icon">
+          <svg viewBox="0 0 24 24" fill="#fbbf24">
+            <polygon points="12,3 22,21 2,21" />
+          </svg>
+        </span>
+        Google Ads
+      </div>
+
+      <!-- Lead Generation -->
+      <div class="badge badge-dark" style="--x: 595; --y: 375;" data-target-circle="inner">
+        <span class="badge-icon">
+          <span class="icon-purple-square"></span>
+        </span>
+        Lead Generation
+      </div>
+
+
+      <!-- Outer Circle Badges (Light) -->
+
+      <!-- Google Maps SEO -->
+      <div class="badge badge-light" style="--x: 310; --y: 190;" data-target-circle="outer">
+        Google Maps SEO
+      </div>
+
+      <!-- Reputation -->
+      <div class="badge badge-light" style="--x: 690; --y: 190;" data-target-circle="outer">
+        Reputation
+      </div>
+
+      <!-- Local Service Ads -->
+      <div class="badge badge-light" style="--x: 255; --y: 245;" data-target-circle="outer">
+        Local Service Ads
+      </div>
+
+      <!-- CRM & Pipeline Setup -->
+      <div class="badge badge-light" style="--x: 775; --y: 245;" data-target-circle="outer">
+        CRM & Pipeline Setup
+      </div>
+
+      <!-- Branding -->
+      <div class="badge badge-light" style="--x: 195; --y: 310;">
+        Branding
+      </div>
+
+      <!-- Content -->
+      <div class="badge badge-light" style="--x: 275; --y: 370;" data-target-circle="outer">
+        Content
+      </div>
+
+      <!-- SMM -->
+      <div class="badge badge-light" style="--x: 805; --y: 310;">
+        SMM
+      </div>
+
+      <!-- AI Call Handler -->
+      <div class="badge badge-light" style="--x: 775; --y: 370;" data-target-circle="outer">
+        AI Call Handler
+      </div>
+
+    </div>
+
+  <script>
+    // Theme Switcher Logic
+    const themeToggleBtn = document.getElementById('themeToggle');
+    const sunIcon = document.getElementById('sunIcon');
+    const moonIcon = document.getElementById('moonIcon');
+    const toggleText = document.getElementById('toggleText');
+    const body = document.body;
+
+    themeToggleBtn.addEventListener('click', () => {
+      body.classList.toggle('dark');
+      const isDark = body.classList.contains('dark');
+      
+      if (isDark) {
+        sunIcon.style.display = 'block';
+        moonIcon.style.display = 'none';
+        toggleText.textContent = 'Light Mode';
+      } else {
+        sunIcon.style.display = 'none';
+        moonIcon.style.display = 'block';
+        toggleText.textContent = 'Dark Mode';
+      }
+    });
+
+    // Hover Highlight Logic
+    const badges = document.querySelectorAll('.badge');
+    badges.forEach(badge => {
+      badge.addEventListener('mouseenter', () => {
+        const circle = badge.getAttribute('data-target-circle');
+        const line = badge.getAttribute('data-target-line');
+        
+        if (circle) {
+          const el = document.querySelector(`.circle-${circle}`);
+          if (el) el.classList.add('highlight');
+        }
+        if (line) {
+          const el = document.querySelector(`.line-${line}`);
+          if (el) el.classList.add('highlight');
+        }
+      });
+
+      badge.addEventListener('mouseleave', () => {
+        const circle = badge.getAttribute('data-target-circle');
+        const line = badge.getAttribute('data-target-line');
+        
+        if (circle) {
+          const el = document.querySelector(`.circle-${circle}`);
+          if (el) el.classList.remove('highlight');
+        }
+        if (line) {
+          const el = document.querySelector(`.line-${line}`);
+          if (el) el.classList.remove('highlight');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

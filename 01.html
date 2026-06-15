@@ -33,34 +33,6 @@
       --font-family: 'Plus Jakarta Sans', sans-serif;
       
       --bg-gradient: radial-gradient(circle at 50% 50%, #ffffff 0%, #f4f4f5 100%);
-      --toggle-bg: #ffffff;
-      --toggle-border: #e4e4e7;
-    }
-
-    body.dark {
-      --bg-color: #09090b;
-      --text-main: #f4f4f5;
-      --text-secondary: #a1a1aa;
-      --line-color: #27272a;
-      --line-color-active: #38bdf8;
-      
-      /* Badges */
-      --badge-dark-bg: #18181b;
-      --badge-dark-text: #ffffff;
-      --badge-dark-border: rgba(255, 255, 255, 0.15);
-      --badge-dark-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-      
-      --badge-light-bg: rgba(24, 24, 27, 0.85);
-      --badge-light-text: #e4e4e7;
-      --badge-light-border: #27272a;
-      --badge-light-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-      
-      --highlight-shadow: 0 0 25px rgba(56, 189, 248, 0.45);
-      --dot-color: #f4f4f5;
-      
-      --bg-gradient: radial-gradient(circle at 50% 50%, #18181b 0%, #09090b 100%);
-      --toggle-bg: #18181b;
-      --toggle-border: #27272a;
     }
 
     * {
@@ -78,41 +50,9 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      transition: background 0.5s cubic-bezier(0.4, 0, 0.2, 1), color 0.5s cubic-bezier(0.4, 0, 0.2, 1);
       overflow-x: hidden;
       padding: 40px 20px;
       position: relative;
-    }
-
-    /* Controls header */
-    .header-controls {
-      position: absolute;
-      top: 32px;
-      right: 32px;
-      display: flex;
-      gap: 12px;
-      z-index: 10;
-    }
-
-    .theme-toggle-btn {
-      background: var(--toggle-bg);
-      border: 1px solid var(--toggle-border);
-      color: var(--text-main);
-      padding: 10px 20px;
-      border-radius: 30px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      user-select: none;
-    }
-
-    .theme-toggle-btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     }
 
     /* Diagram Wrapper - Container Query Parent */
@@ -475,29 +415,6 @@
   </style>
 </head>
 <body>
-    <!-- Controls Header -->
-    <div class="header-controls">
-      <button class="theme-toggle-btn" id="themeToggle">
-        <!-- Sun Icon -->
-        <svg id="sunIcon" class="theme-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
-          <circle cx="12" cy="12" r="4"></circle>
-          <path d="M12 2v2"></path>
-          <path d="M12 20v2"></path>
-          <path d="M4.93 4.93l1.41 1.41"></path>
-          <path d="M17.66 17.66l1.41 1.41"></path>
-          <path d="M2 12h2"></path>
-          <path d="M20 12h2"></path>
-          <path d="M6.34 17.66l-1.41 1.41"></path>
-          <path d="M19.07 4.93l-1.41 1.41"></path>
-        </svg>
-        <!-- Moon Icon -->
-        <svg id="moonIcon" class="theme-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
-        </svg>
-        <span id="toggleText">Dark Mode</span>
-      </button>
-    </div>
-
     <!-- The Diagram Wrapper -->
     <div class="diagram-wrapper">
       
@@ -722,28 +639,6 @@
     </div>
 
   <script>
-    // Theme Switcher Logic
-    const themeToggleBtn = document.getElementById('themeToggle');
-    const sunIcon = document.getElementById('sunIcon');
-    const moonIcon = document.getElementById('moonIcon');
-    const toggleText = document.getElementById('toggleText');
-    const body = document.body;
-
-    themeToggleBtn.addEventListener('click', () => {
-      body.classList.toggle('dark');
-      const isDark = body.classList.contains('dark');
-      
-      if (isDark) {
-        sunIcon.style.display = 'block';
-        moonIcon.style.display = 'none';
-        toggleText.textContent = 'Light Mode';
-      } else {
-        sunIcon.style.display = 'none';
-        moonIcon.style.display = 'block';
-        toggleText.textContent = 'Dark Mode';
-      }
-    });
-
     // Hover Highlight & 3D Parallax Tilt Logic
     const badges = document.querySelectorAll('.badge');
     badges.forEach(badge => {

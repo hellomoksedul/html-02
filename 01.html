@@ -189,34 +189,117 @@
       z-index: 2;
     }
 
-    /* Dark Badges Style */
+    /* Dark Badges — background/clip on ::before so hover preview is never clipped */
     .badge-dark {
-      background: var(--badge-dark-bg);
       color: var(--badge-dark-text);
-      border: 1px solid var(--badge-dark-border);
-      box-shadow: var(--badge-dark-shadow);
+
+      /* Always full pill size — layout never changes during animation */
+      padding: clamp(6px, 0.9cqw, 10px) clamp(10px, 1.4cqw, 16px);
+      border-radius: 50px;
+      justify-content: flex-start;
+      gap: clamp(6px, 0.8cqw, 10px);
+
+      /* Pop-in animation only — no clip-path here */
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.2);
+      will-change: transform, opacity;
+      transition:
+        opacity   0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+        transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
-    /* Light Badges Style */
+    /* Visual pill background — clip-path lives here, not on the badge */
+    .badge-dark::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--badge-dark-bg);
+      border: 1px solid var(--badge-dark-border);
+      box-shadow: var(--badge-dark-shadow);
+      border-radius: 50px;
+      /* Shows only right 40px (icon area), expands leftward */
+      clip-path: inset(0 0 0 calc(100% - 40px) round 50px);
+      will-change: clip-path;
+      transition:
+        clip-path    0.55s cubic-bezier(0.25, 1, 0.5, 1),
+        border-color 0.35s ease,
+        box-shadow   0.35s ease;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Light Badges — simple fade + scale pop-in */
     .badge-light {
       background: var(--badge-light-bg);
       color: var(--badge-light-text);
       border: 1px solid var(--badge-light-border);
       box-shadow: var(--badge-light-shadow);
+
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.2);
+      will-change: transform, opacity;
+      transition:
+        opacity      0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
+        transform    0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
+        box-shadow   0.35s ease,
+        border-color 0.35s ease;
     }
 
-    /* Hover States for Badges */
-    .badge:hover {
-      transform: translate(-50%, -50%) scale(1.04);
-      z-index: 5;
+    /* Step 1: Pop in — circle icon appears (dark) / full pill appears (light) */
+    .badge.animated {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
     }
 
-    .badge-dark:hover {
+    /* Step 2: Expand ::before clip-path from right → full pill */
+    .badge-dark.expanded::before {
+      clip-path: inset(0 0 0 0 round 50px);
+    }
+
+    /* Icon — renders above ::before; JS pre-shifts it right */
+    .badge-dark .badge-icon {
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+      will-change: transform;
+      transition: transform 0.55s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    .badge-dark.expanded .badge-icon {
+      transform: translateX(0) !important;
+    }
+
+    /* Text — renders above ::before; slides in leftward */
+    .badge-dark .badge-text {
+      opacity: 0;
+      transform: translateX(22px);
+      white-space: nowrap;
+      display: inline-block;
+      line-height: normal;
+      position: relative;
+      z-index: 1;
+      transition:
+        opacity   0.38s ease                             0.15s,
+        transform 0.52s cubic-bezier(0.25, 1, 0.5, 1)  0.15s;
+    }
+
+    .badge-dark.expanded .badge-text {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    /* Hover States - With high specificity to override onload transforms */
+    .badge.animated:hover {
+      transform: translate(-50%, -50%) scale(1.05);
+      z-index: 1005;
+    }
+
+    .badge-dark.animated:hover::before {
       box-shadow: var(--highlight-shadow), var(--badge-dark-shadow);
       border-color: var(--line-color-active);
     }
 
-    .badge-light:hover {
+    .badge-light.animated:hover {
       box-shadow: var(--highlight-shadow), var(--badge-light-shadow);
       border-color: var(--line-color-active);
     }
@@ -276,7 +359,7 @@
     /* Opportunity & Scale Text styling */
     .axis-label {
       position: absolute;
-      top: 50%;
+      top: calc(275 / 520 * 100%);
       font-weight: 500;
       font-size: clamp(12px, 1.6cqw, 16px);
       color: var(--text-main);
@@ -297,6 +380,95 @@
       transform: translate(0, -50%);
       margin-left: 14px;
       text-align: left;
+    }
+
+    /* ==========================================================================
+       1-to-1 Video Hover Previews (matching demo.html)
+       ========================================================================== */
+
+    /* Ensure parent badge allows overflow and has relative context */
+    .badge {
+      position: absolute;
+      overflow: visible !important;
+    }
+
+    /* Hover preview wrapper positioning relative to the badge */
+    .badge .content {
+      opacity: 0;
+      visibility: hidden;
+      z-index: 1000;
+      position: absolute;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      pointer-events: none;
+      transition: opacity 0.4s ease, visibility 0.4s ease;
+      width: 240px;
+      height: 170px;
+    }
+
+    /* Show preview when parent badge is hovered */
+    .badge:hover .content {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    /* Card styling */
+    .badge .content .asset {
+      background: #fff;
+      border-radius: 8px;
+      position: relative;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Force video to fill cards */
+    .badge .content .asset video {
+      border-radius: 8px;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* Bottom Card (Asset 1) */
+    .badge .content .asset.asset1 {
+      z-index: 2;
+      width: 200px;
+      height: 150px;
+      transition: transform 0.3s ease-out;
+      transform: translate(-30px, 15px) scale(0.7) rotate(-20deg);
+    }
+
+    /* Top Card (Asset 2) */
+    .badge .content .asset.asset2 {
+      z-index: 1;
+      opacity: 0;
+      width: 160px;
+      height: 120px;
+      transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+      position: absolute;
+      top: -10px;
+      left: 100px;
+      transform: translate(-15px, 15px) scale(0.6) rotate(-8deg);
+    }
+
+    /* Hover States - Slide & Rotate transitions */
+    .badge:hover .content .asset.asset1 {
+      transform: scale(1) rotate(-4deg) !important;
+    }
+
+    .badge:hover .content .asset.asset2 {
+      transform: rotate(8deg);
+      opacity: 1 !important;
+    }
+
+    /* Special 3D/Hover pop for the top card */
+    .badge .content .asset.asset2:hover {
+      z-index: 3;
+      transform: scale(1.15) rotate(8deg) !important;
     }
 
     /* Media queries to fine-tune layout on smaller screens */
@@ -363,7 +535,16 @@
         <span class="badge-icon">
           <span class="icon-green-square"></span>
         </span>
-        Website Design
+        <span class="badge-text">Website Design</span>
+        
+        <div class="content">
+          <div class="asset asset1">
+            <video class="video1" preload="metadata" loading="lazy" playsinline="" loop="" muted="" src="https://www.datocms-assets.com/22695/1724731888-web-01-mozilla-labs.mp4"></video>
+          </div>
+          <div class="asset asset2">
+            <video class="video2" preload="metadata" loading="lazy" playsinline="" loop="" muted="" src="https://www.datocms-assets.com/22695/1724731867-web-02-clearbit.mp4"></video>
+          </div>
+        </div>
       </div>
 
       <!-- AI Search -->
@@ -373,7 +554,16 @@
             <path d="M12 2L15 9L22 12L15 15L12 22L9 15L2 12L9 9Z" fill="#60a5fa"/>
           </svg>
         </span>
-        AI Search
+        <span class="badge-text">AI Search</span>
+        
+        <div class="content">
+          <div class="asset asset1">
+            <video class="video1" preload="metadata" loading="lazy" playsinline="" loop="" muted="" src="https://www.datocms-assets.com/22695/1724732017-app-design-01-turo.mp4"></video>
+          </div>
+          <div class="asset asset2">
+            <video class="video2" preload="metadata" loading="lazy" playsinline="" loop="" muted="" src="https://www.datocms-assets.com/22695/1724731996-app-design-02-tile.mp4"></video>
+          </div>
+        </div>
       </div>
 
       <!-- SEO -->
@@ -381,7 +571,16 @@
         <span class="badge-icon">
           <span class="icon-green-circle"></span>
         </span>
-        SEO
+        <span class="badge-text">SEO</span>
+        
+        <div class="content">
+          <div class="asset asset1">
+            <video class="video1" preload="metadata" loading="lazy" playsinline="" loop="" muted="" src="https://www.datocms-assets.com/22695/1724731941-ux-01-ninox.mp4"></video>
+          </div>
+          <div class="asset asset2">
+            <video class="video2" preload="metadata" loading="lazy" playsinline="" loop="" muted="" src="https://www.datocms-assets.com/22695/1724731913-ux-02-nbcuniversal.mp4"></video>
+          </div>
+        </div>
       </div>
 
       <!-- Meta Ads -->
@@ -391,7 +590,16 @@
             <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
           </svg>
         </span>
-        Meta Ads
+        <span class="badge-text">Meta Ads</span>
+        
+        <div class="content">
+          <div class="asset asset1">
+            <video class="video1" preload="metadata" loading="lazy" playsinline="" loop="" muted="" src="https://www.datocms-assets.com/22695/1724732054-branding-01-descript.mp4"></video>
+          </div>
+          <div class="asset asset2">
+            <video class="video2" preload="metadata" loading="lazy" playsinline="" loop="" muted="" src="https://www.datocms-assets.com/22695/1724732074-branding-02-firefox.mp4"></video>
+          </div>
+        </div>
       </div>
 
       <!-- Conversion Optimization -->
@@ -401,7 +609,16 @@
             <polygon points="12,2 22,7.5 22,18.5 12,24 2,18.5 2,7.5" />
           </svg>
         </span>
-        Conversion Optimization
+        <span class="badge-text">Conversion Optimization</span>
+        
+        <div class="content">
+          <div class="asset asset1">
+            <video class="video1" preload="metadata" loading="lazy" playsinline="" loop="" muted="" src="https://www.datocms-assets.com/22695/1724731847-web-app-dev-01-emi-health.mp4"></video>
+          </div>
+          <div class="asset asset2">
+            <video class="video2" preload="metadata" loading="lazy" playsinline="" loop="" muted="" src="https://www.datocms-assets.com/22695/1724731817-web-app-dev-02-vela.mp4"></video>
+          </div>
+        </div>
       </div>
 
       <!-- Automation -->
@@ -411,7 +628,16 @@
             <polygon points="6,4 20,12 6,20" />
           </svg>
         </span>
-        Automation
+        <span class="badge-text">Automation</span>
+        
+        <div class="content">
+          <div class="asset asset1">
+            <video class="video1" preload="metadata" loading="lazy" playsinline="" loop="" muted="" src="https://www.datocms-assets.com/22695/1724732097-design-systems-01-salesforce.mp4"></video>
+          </div>
+          <div class="asset asset2">
+            <video class="video2" preload="metadata" loading="lazy" playsinline="" loop="" muted="" src="https://www.datocms-assets.com/22695/1731318532-design-systems-02-opswat.mp4"></video>
+          </div>
+        </div>
       </div>
 
       <!-- Google Ads -->
@@ -421,7 +647,16 @@
             <polygon points="12,3 22,21 2,21" />
           </svg>
         </span>
-        Google Ads
+        <span class="badge-text">Google Ads</span>
+        
+        <div class="content">
+          <div class="asset asset1">
+            <video class="video1" preload="metadata" loading="lazy" playsinline="" loop="" muted="" src="https://www.datocms-assets.com/22695/1724731967-bp-video-strategy.mp4"></video>
+          </div>
+          <div class="asset asset2">
+            <video class="video2" preload="metadata" loading="lazy" playsinline="" loop="" muted="" src="https://www.datocms-assets.com/22695/1724731888-web-01-mozilla-labs.mp4"></video>
+          </div>
+        </div>
       </div>
 
       <!-- Lead Generation -->
@@ -429,7 +664,16 @@
         <span class="badge-icon">
           <span class="icon-purple-square"></span>
         </span>
-        Lead Generation
+        <span class="badge-text">Lead Generation</span>
+        
+        <div class="content">
+          <div class="asset asset1">
+            <video class="video1" preload="metadata" loading="lazy" playsinline="" loop="" muted="" src="https://www.datocms-assets.com/22695/1724732017-app-design-01-turo.mp4"></video>
+          </div>
+          <div class="asset asset2">
+            <video class="video2" preload="metadata" loading="lazy" playsinline="" loop="" muted="" src="https://www.datocms-assets.com/22695/1724731817-web-app-dev-02-vela.mp4"></video>
+          </div>
+        </div>
       </div>
 
 
@@ -500,7 +744,7 @@
       }
     });
 
-    // Hover Highlight Logic
+    // Hover Highlight & 3D Parallax Tilt Logic
     const badges = document.querySelectorAll('.badge');
     badges.forEach(badge => {
       badge.addEventListener('mouseenter', () => {
@@ -529,6 +773,75 @@
           const el = document.querySelector(`.line-${line}`);
           if (el) el.classList.remove('highlight');
         }
+      });
+
+      // Video Playback Control on Hover (matching demo.html)
+      const videos = badge.querySelectorAll('video');
+      if (videos.length > 0) {
+        badge.addEventListener('mouseenter', () => {
+          videos.forEach((video) => {
+            video.play().catch((error) => {
+              console.log("Video playback prevented:", error);
+            });
+          });
+        });
+
+        badge.addEventListener('mouseleave', () => {
+          videos.forEach((video) => {
+            video.pause();
+            video.currentTime = 0;
+          });
+        });
+      }
+    });
+
+    // Staggered entry animation: featured (dark) first, then light badges
+    document.addEventListener('DOMContentLoaded', () => {
+      const STAGGER     = 100; // ms between each badge popping in
+      const EXPAND_DELAY = 500; // ms pause after icon appears before sliding open
+
+      const allBadges = Array.from(badges);
+
+      const darkBadges = allBadges
+        .filter(b => b.classList.contains('badge-dark'))
+        .sort((a, b) => parseFloat(a.style.getPropertyValue('--x')) - parseFloat(b.style.getPropertyValue('--x')));
+
+      const lightBadges = allBadges
+        .filter(b => b.classList.contains('badge-light'))
+        .sort((a, b) => parseFloat(a.style.getPropertyValue('--x')) - parseFloat(b.style.getPropertyValue('--x')));
+
+      // Pre-shift each dark badge's icon to the RIGHT edge (badge is invisible, so this is instant)
+      darkBadges.forEach(badge => {
+        const iconEl = badge.querySelector('.badge-icon');
+        if (!iconEl) return;
+        const styles  = getComputedStyle(badge);
+        const badgeW  = badge.offsetWidth;
+        const iconW   = iconEl.offsetWidth;
+        const leftPad = parseFloat(styles.paddingLeft)  || 10;
+        const rightPad= parseFloat(styles.paddingRight) || 14;
+        // Center icon precisely in the visible 40px inset area (right 40px, center = badgeW - 20)
+        const visibleCenter = badgeW - 20;
+        const naturalCenter = leftPad + iconW / 2;
+        const shift = visibleCenter - naturalCenter;
+        // Apply instantly (badge is opacity:0 — invisible to user)
+        iconEl.style.transition = 'none';
+        iconEl.style.transform  = `translateX(${Math.max(0, shift)}px)`;
+        // Re-enable the CSS transition on next frame so slide-back is animated
+        requestAnimationFrame(() => { iconEl.style.transition = ''; });
+      });
+
+      // Animate dark badges first
+      darkBadges.forEach((badge, index) => {
+        setTimeout(() => {
+          badge.classList.add('animated');                                   // circle pops in (right side)
+          setTimeout(() => badge.classList.add('expanded'), EXPAND_DELAY);  // icon slides left, text reveals
+        }, index * STAGGER);
+      });
+
+      // Light badges begin after dark group finishes + a short pause
+      const lightStart = darkBadges.length * STAGGER + 150;
+      lightBadges.forEach((badge, index) => {
+        setTimeout(() => badge.classList.add('animated'), lightStart + index * STAGGER);
       });
     });
   </script>

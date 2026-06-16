@@ -20,13 +20,13 @@
       /* Badges */
       --badge-dark-bg: #18181b;
       --badge-dark-text: #ffffff;
-      --badge-dark-border: rgba(255, 255, 255, 0.06);
-      --badge-dark-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      --badge-dark-border: rgba(255, 255, 255, 0.1);
+      --badge-dark-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       
       --badge-light-bg: #ffffff;
       --badge-light-text: #27272a;
-      --badge-light-border: #ebebeb;
-      --badge-light-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+      --badge-light-border: #e4e4e7;
+      --badge-light-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
       
       --highlight-shadow: 0 0 20px rgba(59, 130, 246, 0.35);
       --dot-color: #18181b;
@@ -39,14 +39,6 @@
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-    }
-
-    /* Crisp rendering for all badge text */
-    .badge {
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      backface-visibility: hidden;
-      -webkit-backface-visibility: hidden;
     }
 
     body {
@@ -91,7 +83,30 @@
       transition: stroke 0.4s cubic-bezier(0.4, 0, 0.2, 1), stroke-width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
+    /* Highlight class triggered by JS on hover */
+    .diagram-line.highlight {
+      stroke: var(--line-color-active);
+      stroke-width: 2.25;
+      stroke-dasharray: 7 4;
+      animation: line-flow 1.5s linear infinite;
+    }
 
+    @keyframes line-flow {
+      to {
+        stroke-dashoffset: -20;
+      }
+    }
+
+    /* Opportunity & Scale Dots */
+    .diagram-dot {
+      fill: var(--dot-color);
+      transition: fill 0.4s cubic-bezier(0.4, 0, 0.2, 1), r 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .diagram-dot.highlight {
+      fill: var(--line-color-active);
+      r: 8;
+    }
 
     /* HTML Badges positioned relative to coordinate space */
     .badge {
@@ -126,7 +141,8 @@
 
       /* Pop-in animation only — no clip-path here */
       opacity: 0;
-      transform: translate(-50%, -50%) translateZ(0) scale(0.2);
+      transform: translate(-50%, -50%) scale(0.2);
+      will-change: transform, opacity;
       transition:
         opacity   0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
         transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -143,8 +159,11 @@
       border-radius: 50px;
       /* Shows only right 40px (icon area), expands leftward */
       clip-path: inset(0 0 0 calc(100% - 40px) round 50px);
+      will-change: clip-path;
       transition:
-        clip-path    0.55s cubic-bezier(0.25, 1, 0.5, 1);
+        clip-path    0.55s cubic-bezier(0.25, 1, 0.5, 1),
+        border-color 0.35s ease,
+        box-shadow   0.35s ease;
       pointer-events: none;
       z-index: 0;
     }
@@ -157,16 +176,19 @@
       box-shadow: var(--badge-light-shadow);
 
       opacity: 0;
-      transform: translate(-50%, -50%) translateZ(0) scale(0.2);
+      transform: translate(-50%, -50%) scale(0.2);
+      will-change: transform, opacity;
       transition:
         opacity      0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
-        transform    0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+        transform    0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
+        box-shadow   0.35s ease,
+        border-color 0.35s ease;
     }
 
     /* Step 1: Pop in — circle icon appears (dark) / full pill appears (light) */
     .badge.animated {
       opacity: 1;
-      transform: translate(-50%, -50%) translateZ(0) scale(1);
+      transform: translate(-50%, -50%) scale(1);
     }
 
     /* Step 2: Expand ::before clip-path from right → full pill */
@@ -206,15 +228,20 @@
       transform: translateX(0);
     }
 
-    /* Hover States — only subtle scale, no border/glow changes */
+    /* Hover States - With high specificity to override onload transforms */
     .badge.animated:hover {
-      transform: translate(-50%, -50%) translateZ(0) scale(1.05);
+      transform: translate(-50%, -50%) scale(1.05);
       z-index: 1005;
     }
 
-    /* Light (outline) badges — no hover effect at all */
+    .badge-dark.animated:hover::before {
+      box-shadow: var(--highlight-shadow), var(--badge-dark-shadow);
+      border-color: var(--line-color-active);
+    }
+
     .badge-light.animated:hover {
-      transform: translate(-50%, -50%) translateZ(0) scale(1);
+      box-shadow: var(--highlight-shadow), var(--badge-light-shadow);
+      border-color: var(--line-color-active);
     }
 
     /* Badge Icons styling */
@@ -405,84 +432,6 @@
     }
     .diagram-wrapper.animated .center-header h1 {
       color: var(--text-main);
-    }
-
-    /* =========================================================================
-       BADGE HOVER VIDEO/ASSET CARD STYLING
-       ========================================================================= */
-    .badge-dark .content {
-      opacity: 0;
-      visibility: hidden;
-      z-index: -1;
-      position: absolute;
-      bottom: 100%;
-      left: 50%;
-      transition: opacity 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), visibility 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-    }
-
-    @media (max-width: 768px) {
-      .badge-dark .content {
-        visibility: hidden !important;
-        display: none !important;
-      }
-    }
-
-    .badge-dark .content .asset {
-      background: #fff;
-      border-radius: 8px;
-      position: relative;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-    }
-
-    .badge-dark .content .asset.asset1 {
-      z-index: 1;
-      width: 220px;
-      height: 165px;
-      transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-      transform: translate(-40px, 20px) scale(0.6) rotate(-24deg);
-    }
-
-    .badge-dark .content .asset.asset2 {
-      z-index: 0;
-      opacity: 0;
-      width: 180px;
-      height: 135px;
-      transition:
-        transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1),
-        opacity 0.5s ease;
-      position: absolute;
-      top: -10px;
-      left: 110px;
-      transform: translate(-20px, 20px) scale(0.5) rotate(-8deg);
-    }
-
-    .badge-dark .content .asset.asset2:hover {
-      z-index: 2;
-      transform: scale(1.2) rotate(8deg) !important;
-    }
-
-    .badge-dark .content .asset video {
-      border-radius: 8px;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-
-    /* Reveal and animate assets on hover of the dark badge */
-    .badge-dark:hover .content {
-      opacity: 1;
-      visibility: visible;
-      z-index: 10;
-    }
-
-    .badge-dark:hover .content .asset.asset1 {
-      transform: scale(1) rotate(-4deg) !important;
-    }
-
-    .badge-dark:hover .content .asset.asset2 {
-      transform: rotate(8deg);
-      opacity: 1 !important;
     }
   </style>
 </head>
@@ -711,18 +660,50 @@
     </div>
 
   <script>
-    // Video Playback Control on Hover
+    // Hover Highlight & 3D Parallax Tilt Logic
     const badges = document.querySelectorAll('.badge');
     badges.forEach(badge => {
+      badge.addEventListener('mouseenter', () => {
+        const circle = badge.getAttribute('data-target-circle');
+        const line = badge.getAttribute('data-target-line');
+        
+        if (circle) {
+          const el = document.querySelector(`.circle-${circle}`);
+          if (el) el.classList.add('highlight');
+        }
+        if (line) {
+          const el = document.querySelector(`.line-${line}`);
+          if (el) el.classList.add('highlight');
+        }
+      });
+
+      badge.addEventListener('mouseleave', () => {
+        const circle = badge.getAttribute('data-target-circle');
+        const line = badge.getAttribute('data-target-line');
+        
+        if (circle) {
+          const el = document.querySelector(`.circle-${circle}`);
+          if (el) el.classList.remove('highlight');
+        }
+        if (line) {
+          const el = document.querySelector(`.line-${line}`);
+          if (el) el.classList.remove('highlight');
+        }
+      });
+
+      // Video Playback Control on Hover (matching demo.html)
       const videos = badge.querySelectorAll('video');
       if (videos.length > 0) {
         badge.addEventListener('mouseenter', () => {
-          videos.forEach(video => {
-            video.play().catch(err => console.log('Video play prevented:', err));
+          videos.forEach((video) => {
+            video.play().catch((error) => {
+              console.log("Video playback prevented:", error);
+            });
           });
         });
+
         badge.addEventListener('mouseleave', () => {
-          videos.forEach(video => {
+          videos.forEach((video) => {
             video.pause();
             video.currentTime = 0;
           });
@@ -730,15 +711,18 @@
       }
     });
 
-    // Animation runs only when diagram enters the viewport
-    function runAnimation(diagramWrapper) {
-      const allBadges   = Array.from(diagramWrapper.querySelectorAll('.badge'));
+    // Staggered entry animation: featured (dark) first, then light badges
+    function initAnimation() {
+      const diagramWrapper = document.querySelector('.diagram-wrapper');
+      if (!diagramWrapper) return;
+
+      const allBadges   = Array.from(document.querySelectorAll('.badge'));
       const darkBadges  = allBadges.filter(b => b.classList.contains('badge-dark'));
       const lightBadges = allBadges.filter(b => b.classList.contains('badge-light'));
       const STAGGER = 100;
       const EXPAND_DELAY = 500;
 
-      // Pre-shift dark badge icons to icon-only position before they pop in
+      // Pre-shift dark badge icons
       darkBadges.forEach(badge => {
         const iconEl = badge.querySelector('.badge-icon');
         if (!iconEl) return;
@@ -749,53 +733,34 @@
         requestAnimationFrame(() => { iconEl.style.transition = ''; });
       });
 
-      // Step 1 (500ms): Diagram intro — line grows, circles spin, dots separate
+      // 500ms: trigger diagram animation (dashed line grows, dots separate, text slides)
       setTimeout(() => {
         diagramWrapper.classList.add('animated');
       }, 500);
 
-      // Step 2 (2600ms): Intro done — interaction unlocked
+      // 2600ms: transition to intro-done, revealing badges and enabling interaction
       setTimeout(() => {
         diagramWrapper.classList.add('intro-done');
       }, 2600);
 
-      // Step 3 (2900ms): Dark featured badges pop in first
+      // 2900ms: badge entry animation starts
       setTimeout(() => {
-        darkBadges.forEach((badge, i) => {
-          setTimeout(() => {
-            badge.classList.add('animated');
-            setTimeout(() => badge.classList.add('expanded'), EXPAND_DELAY);
-          }, i * STAGGER);
-        });
-
-        // Step 4: Light outline badges appear after dark badges settle
-        const darkDelay = darkBadges.length * STAGGER + 400;
+        lightBadges.forEach((badge, i) => setTimeout(() => badge.classList.add('animated'), i * STAGGER));
         setTimeout(() => {
-          lightBadges.forEach((badge, i) => setTimeout(() => badge.classList.add('animated'), i * STAGGER));
-        }, darkDelay);
+          darkBadges.forEach((badge, i) => {
+            setTimeout(() => {
+              badge.classList.add('animated');
+              setTimeout(() => badge.classList.add('expanded'), EXPAND_DELAY);
+            }, i * STAGGER);
+          });
+        }, 300);
       }, 2900);
     }
 
-    function initObserver() {
-      const diagramWrapper = document.querySelector('.diagram-wrapper');
-      if (!diagramWrapper) return;
-
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            observer.unobserve(diagramWrapper); // fire once only
-            runAnimation(diagramWrapper);
-          }
-        });
-      }, { threshold: 0.2 }); // start when 20% of diagram is visible
-
-      observer.observe(diagramWrapper);
-    }
-
     if (document.readyState !== 'loading') {
-      initObserver();
+      initAnimation();
     } else {
-      document.addEventListener('DOMContentLoaded', initObserver);
+      document.addEventListener('DOMContentLoaded', initAnimation);
     }
   </script>
 </body>

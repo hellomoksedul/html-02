@@ -382,21 +382,21 @@
           top 2.1s cubic-bezier(0.89, 0.34, 0.2, 0.83),
           transform 2.1s cubic-bezier(0.89, 0.34, 0.2, 0.83);
       }
-      .center-header h1 {
+      .center-header h2 {
         transition: color 2.1s ease;
       }
       .diagram-wrapper:not(.animated) .center-header {
         top: calc(275 / 520 * 100%);
         transform: translate(-50%, -50%) scale(1.25);
       }
-      .diagram-wrapper:not(.animated) .center-header h1 {
+      .diagram-wrapper:not(.animated) .center-header h2 {
         color: #ffffff;
       }
       .diagram-wrapper.animated .center-header {
         top: calc(85 / 520 * 100%);
         transform: translate(-50%, -50%) scale(1);
       }
-      .diagram-wrapper.animated .center-header h1 {
+      .diagram-wrapper.animated .center-header h2 {
         color: var(--text-main);
       }
 
@@ -483,7 +483,8 @@
        MOBILE RESPONSIVENESS FIX
        ========================================================================= */
       @media (max-width: 768px) {
-        html, body {
+        html,
+        body {
           overflow-x: hidden !important;
           max-width: 100vw !important;
         }
@@ -497,10 +498,8 @@
           height: auto !important;
         }
 
-        /* Hide side text and horizontal line to reduce clutter, but keep outline buttons */
-        .diagram-wrapper .axis-label,
-        .diagram-wrapper .diagram-dot,
-        .diagram-wrapper .line-horizontal {
+        /* Hide side text to reduce clutter, but keep shapes for animation */
+        .diagram-wrapper .axis-label {
           display: none !important;
         }
 
@@ -510,11 +509,11 @@
           transform-origin: 50% 50% !important;
         }
 
-        /* Move title to top and increase size slightly */
-        .center-header {
+        /* Move title to top during animation to allow it to slide up */
+        .diagram-wrapper.animated .center-header {
           top: 6% !important;
         }
-        .center-header h1 {
+        .center-header h2 {
           font-size: 20px !important;
         }
 
@@ -562,16 +561,40 @@
 
         /* Reposition Outline Buttons (.badge-light) to form an outer ring and prevent overlap */
         /* Left Side */
-        .diagram-wrapper .badge-light:nth-child(13) { --x: 250 !important; --y: 120 !important; } /* Google Maps SEO */
-        .diagram-wrapper .badge-light:nth-child(15) { --x: 220 !important; --y: 220 !important; } /* Local Service Ads */
-        .diagram-wrapper .badge-light:nth-child(17) { --x: 200 !important; --y: 320 !important; } /* Branding */
-        .diagram-wrapper .badge-light:nth-child(18) { --x: 240 !important; --y: 410 !important; } /* Content */
+        .diagram-wrapper .badge-light:nth-child(13) {
+          --x: 250 !important;
+          --y: 120 !important;
+        } /* Google Maps SEO */
+        .diagram-wrapper .badge-light:nth-child(15) {
+          --x: 220 !important;
+          --y: 220 !important;
+        } /* Local Service Ads */
+        .diagram-wrapper .badge-light:nth-child(17) {
+          --x: 200 !important;
+          --y: 320 !important;
+        } /* Branding */
+        .diagram-wrapper .badge-light:nth-child(18) {
+          --x: 240 !important;
+          --y: 410 !important;
+        } /* Content */
 
         /* Right Side */
-        .diagram-wrapper .badge-light:nth-child(14) { --x: 750 !important; --y: 120 !important; } /* Reputation */
-        .diagram-wrapper .badge-light:nth-child(16) { --x: 780 !important; --y: 220 !important; } /* CRM & Pipeline */
-        .diagram-wrapper .badge-light:nth-child(19) { --x: 800 !important; --y: 320 !important; } /* SMM */
-        .diagram-wrapper .badge-light:nth-child(20) { --x: 760 !important; --y: 410 !important; } /* AI Call Handler */
+        .diagram-wrapper .badge-light:nth-child(14) {
+          --x: 750 !important;
+          --y: 120 !important;
+        } /* Reputation */
+        .diagram-wrapper .badge-light:nth-child(16) {
+          --x: 780 !important;
+          --y: 220 !important;
+        } /* CRM & Pipeline */
+        .diagram-wrapper .badge-light:nth-child(19) {
+          --x: 800 !important;
+          --y: 320 !important;
+        } /* SMM */
+        .diagram-wrapper .badge-light:nth-child(20) {
+          --x: 760 !important;
+          --y: 410 !important;
+        } /* AI Call Handler */
       }
     </style>
   </head>
@@ -606,7 +629,7 @@
 
       <!-- Center Title -->
       <div class="center-header" style="--y: 85">
-        <h1>The Growth<br />Core</h1>
+        <h2>The Growth<br />Core</h2>
       </div>
 
       <!-- ================== BADGES ================== -->

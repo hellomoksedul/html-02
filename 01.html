@@ -497,8 +497,7 @@
           height: auto !important;
         }
 
-        /* Hide outline buttons, side text, and horizontal line to reduce clutter */
-        .diagram-wrapper .badge-light,
+        /* Hide side text and horizontal line to reduce clutter, but keep outline buttons */
         .diagram-wrapper .axis-label,
         .diagram-wrapper .diagram-dot,
         .diagram-wrapper .line-horizontal {
@@ -560,6 +559,19 @@
         .diagram-wrapper .badge-dark:nth-child(12) {
           --y: 440 !important;
         }
+
+        /* Reposition Outline Buttons (.badge-light) to form an outer ring and prevent overlap */
+        /* Left Side */
+        .diagram-wrapper .badge-light:nth-child(13) { --x: 250 !important; --y: 120 !important; } /* Google Maps SEO */
+        .diagram-wrapper .badge-light:nth-child(15) { --x: 220 !important; --y: 220 !important; } /* Local Service Ads */
+        .diagram-wrapper .badge-light:nth-child(17) { --x: 200 !important; --y: 320 !important; } /* Branding */
+        .diagram-wrapper .badge-light:nth-child(18) { --x: 240 !important; --y: 410 !important; } /* Content */
+
+        /* Right Side */
+        .diagram-wrapper .badge-light:nth-child(14) { --x: 750 !important; --y: 120 !important; } /* Reputation */
+        .diagram-wrapper .badge-light:nth-child(16) { --x: 780 !important; --y: 220 !important; } /* CRM & Pipeline */
+        .diagram-wrapper .badge-light:nth-child(19) { --x: 800 !important; --y: 320 !important; } /* SMM */
+        .diagram-wrapper .badge-light:nth-child(20) { --x: 760 !important; --y: 410 !important; } /* AI Call Handler */
       }
     </style>
   </head>

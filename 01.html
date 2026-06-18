@@ -1,477 +1,571 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>The Growth Core Diagram</title>
-  <!-- Google Fonts for premium typography -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    /* CSS Variables for design tokens */
-    :root {
-      --bg-color: #fafafa;
-      --text-main: #18181b;
-      --text-secondary: #71717a;
-      --line-color: #d4d4d8;
-      --line-color-active: #3b82f6;
-      
-      /* Badges */
-      --badge-dark-bg: #18181b;
-      --badge-dark-text: #ffffff;
-      --badge-dark-border: rgba(255, 255, 255, 0.06);
-      --badge-dark-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-      
-      --badge-light-bg: #ffffff;
-      --badge-light-text: #27272a;
-      --badge-light-border: #ebebeb;
-      --badge-light-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
-      
-      --highlight-shadow: 0 0 20px rgba(59, 130, 246, 0.35);
-      --dot-color: #18181b;
-      --font-family: 'Plus Jakarta Sans', sans-serif;
-      
-      --bg-gradient: radial-gradient(circle at 50% 50%, #ffffff 0%, #f4f4f5 100%);
-    }
-    /* Crisp rendering for all badge text */
-    .badge {
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      backface-visibility: hidden;
-      -webkit-backface-visibility: hidden;
-    }
-    /* Diagram Wrapper - Container Query Parent */
-    .diagram-wrapper {
-      container-type: inline-size;
-      width: 100%;
-      max-width: 1280px;
-      aspect-ratio: 1000 / 520;
-      position: relative;
-      margin: 0 auto;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The Growth Core Diagram</title>
+    <!-- Google Fonts for premium typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* CSS Variables for design tokens */
+      :root {
+        --bg-color: #fafafa;
+        --text-main: #18181b;
+        --text-secondary: #71717a;
+        --line-color: #d4d4d8;
+        --line-color-active: #3b82f6;
 
-    /* SVG overlay for paths and lines */
-    .diagram-svg {
-      width: 100%;
-      height: 100%;
-      position: absolute;
-      top: 0;
-      left: 0;
-      pointer-events: none;
-    }
+        /* Badges */
+        --badge-dark-bg: #18181b;
+        --badge-dark-text: #ffffff;
+        --badge-dark-border: rgba(255, 255, 255, 0.06);
+        --badge-dark-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 
-    .diagram-line {
-      stroke: var(--line-color);
-      stroke-width: 1.5;
-      stroke-dasharray: 5 5;
-      fill: none;
-      transition: stroke 0.4s cubic-bezier(0.4, 0, 0.2, 1), stroke-width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    }
+        --badge-light-bg: #ffffff;
+        --badge-light-text: #27272a;
+        --badge-light-border: #ebebeb;
+        --badge-light-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
 
+        --highlight-shadow: 0 0 20px rgba(59, 130, 246, 0.35);
+        --dot-color: #18181b;
+        --font-family: "Plus Jakarta Sans", sans-serif;
 
+        --bg-gradient: radial-gradient(
+          circle at 50% 50%,
+          #ffffff 0%,
+          #f4f4f5 100%
+        );
+      }
+      /* Crisp rendering for all badge text */
+      .badge {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+      }
+      /* Diagram Wrapper - Container Query Parent */
+      .diagram-wrapper {
+        container-type: inline-size;
+        width: 100%;
+        max-width: 1280px;
+        aspect-ratio: 1000 / 520;
+        position: relative;
+        margin: 0 auto;
+      }
 
-    /* HTML Badges positioned relative to coordinate space */
-    .badge {
-      position: absolute;
-      left: calc(var(--x) / 1000 * 100%);
-      top: calc(var(--y) / 520 * 100%);
-      transform: translate(-50%, -50%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: clamp(6px, 0.8cqw, 10px);
-      white-space: nowrap;
-      border-radius: 50px;
-      font-weight: 500;
-      font-size: clamp(11px, 1.4cqw, 15px);
-      padding: clamp(6px, 0.9cqw, 10px) clamp(8px, 1.2cqw, 14px);
-      transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
-      cursor: pointer;
-      user-select: none;
-      z-index: 2;
-    }
+      /* SVG overlay for paths and lines */
+      .diagram-svg {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+      }
 
-    /* Dark Badges — background/clip on ::before so hover preview is never clipped */
-    .badge-dark {
-      color: var(--badge-dark-text);
+      .diagram-line {
+        stroke: var(--line-color);
+        stroke-width: 1.5;
+        stroke-dasharray: 5 5;
+        fill: none;
+        transition:
+          stroke 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+          stroke-width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      /* HTML Badges positioned relative to coordinate space */
+      .badge {
+        position: absolute;
+        left: calc(var(--x) / 1000 * 100%);
+        top: calc(var(--y) / 520 * 100%);
+        transform: translate(-50%, -50%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: clamp(6px, 0.8cqw, 10px);
+        white-space: nowrap;
+        border-radius: 50px;
+        font-weight: 500;
+        font-size: clamp(11px, 1.4cqw, 15px);
+        padding: clamp(6px, 0.9cqw, 10px) clamp(8px, 1.2cqw, 14px);
+        transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+        cursor: pointer;
+        user-select: none;
+        z-index: 2;
+      }
 
-      /* Always full pill size — layout never changes during animation */
-      padding: clamp(6px, 0.9cqw, 10px) clamp(10px, 1.4cqw, 16px);
-      border-radius: 50px;
-      justify-content: flex-start;
-      gap: clamp(6px, 0.8cqw, 10px);
+      /* Dark Badges — background/clip on ::before so hover preview is never clipped */
+      .badge-dark {
+        color: var(--badge-dark-text);
 
-      /* Pop-in animation only — no clip-path here */
-      opacity: 0;
-      transform: translate(-50%, -50%) translateZ(0) scale(0.2);
-      transition:
-        opacity   0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
-        transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
+        /* Always full pill size — layout never changes during animation */
+        padding: clamp(6px, 0.9cqw, 10px) clamp(10px, 1.4cqw, 16px);
+        border-radius: 50px;
+        justify-content: flex-start;
+        gap: clamp(6px, 0.8cqw, 10px);
 
-    /* Visual pill background — clip-path lives here, not on the badge */
-    .badge-dark::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: var(--badge-dark-bg);
-      border: 1px solid var(--badge-dark-border);
-      box-shadow: var(--badge-dark-shadow);
-      border-radius: 50px;
-      /* Shows only right 40px (icon area), expands leftward */
-      clip-path: inset(0 0 0 calc(100% - 40px) round 50px);
-      transition:
-        clip-path    0.55s cubic-bezier(0.25, 1, 0.5, 1);
-      pointer-events: none;
-      z-index: 0;
-    }
+        /* Pop-in animation only — no clip-path here */
+        opacity: 0;
+        transform: translate(-50%, -50%) translateZ(0) scale(0.2);
+        transition:
+          opacity 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+          transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
 
-    /* Light Badges — simple fade + scale pop-in */
-    .badge-light {
-      background: var(--badge-light-bg);
-      color: var(--badge-light-text);
-      border: 1px solid var(--badge-light-border);
-      box-shadow: var(--badge-light-shadow);
+      /* Visual pill background — clip-path lives here, not on the badge */
+      .badge-dark::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: var(--badge-dark-bg);
+        border: 1px solid var(--badge-dark-border);
+        box-shadow: var(--badge-dark-shadow);
+        border-radius: 50px;
+        /* Shows only right 40px (icon area), expands leftward */
+        clip-path: inset(0 0 0 calc(100% - 40px) round 50px);
+        transition: clip-path 0.55s cubic-bezier(0.25, 1, 0.5, 1);
+        pointer-events: none;
+        z-index: 0;
+      }
 
-      opacity: 0;
-      transform: translate(-50%, -50%) translateZ(0) scale(0.2);
-      transition:
-        opacity      0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
-        transform    0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
+      /* Light Badges — simple fade + scale pop-in */
+      .badge-light {
+        background: var(--badge-light-bg);
+        color: var(--badge-light-text);
+        border: 1px solid var(--badge-light-border);
+        box-shadow: var(--badge-light-shadow);
 
-    /* Step 1: Pop in — circle icon appears (dark) / full pill appears (light) */
-    .badge.animated {
-      opacity: 1;
-      transform: translate(-50%, -50%) translateZ(0) scale(1);
-    }
+        opacity: 0;
+        transform: translate(-50%, -50%) translateZ(0) scale(0.2);
+        transition:
+          opacity 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
+          transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
 
-    /* Step 2: Expand ::before clip-path from right → full pill */
-    .badge-dark.expanded::before {
-      clip-path: inset(0 0 0 0 round 50px);
-    }
+      /* Step 1: Pop in — circle icon appears (dark) / full pill appears (light) */
+      .badge.animated {
+        opacity: 1;
+        transform: translate(-50%, -50%) translateZ(0) scale(1);
+      }
 
-    /* Icon — renders above ::before; JS pre-shifts it right */
-    .badge-dark .badge-icon {
-      flex-shrink: 0;
-      position: relative;
-      z-index: 1;
-      will-change: transform;
-      transition: transform 0.55s cubic-bezier(0.25, 1, 0.5, 1);
-    }
+      /* Step 2: Expand ::before clip-path from right → full pill */
+      .badge-dark.expanded::before {
+        clip-path: inset(0 0 0 0 round 50px);
+      }
 
-    .badge-dark.expanded .badge-icon {
-      transform: translateX(0) !important;
-    }
+      /* Icon — renders above ::before; JS pre-shifts it right */
+      .badge-dark .badge-icon {
+        flex-shrink: 0;
+        position: relative;
+        z-index: 1;
+        will-change: transform;
+        transition: transform 0.55s cubic-bezier(0.25, 1, 0.5, 1);
+      }
 
-    /* Text — renders above ::before; slides in leftward */
-    .badge-dark .badge-text {
-      opacity: 0;
-      transform: translateX(22px);
-      white-space: nowrap;
-      display: inline-block;
-      line-height: normal;
-      position: relative;
-      z-index: 1;
-      transition:
-        opacity   0.38s ease                             0.15s,
-        transform 0.52s cubic-bezier(0.25, 1, 0.5, 1)  0.15s;
-    }
+      .badge-dark.expanded .badge-icon {
+        transform: translateX(0) !important;
+      }
 
-    .badge-dark.expanded .badge-text {
-      opacity: 1;
-      transform: translateX(0);
-    }
+      /* Text — renders above ::before; slides in leftward */
+      .badge-dark .badge-text {
+        opacity: 0;
+        transform: translateX(22px);
+        white-space: nowrap;
+        display: inline-block;
+        line-height: normal;
+        position: relative;
+        z-index: 1;
+        transition:
+          opacity 0.38s ease 0.15s,
+          transform 0.52s cubic-bezier(0.25, 1, 0.5, 1) 0.15s;
+      }
 
-    /* Hover States — only subtle scale, no border/glow changes */
-    .badge.animated:hover {
-      transform: translate(-50%, -50%) translateZ(0) scale(1.05);
-      z-index: 1005;
-    }
+      .badge-dark.expanded .badge-text {
+        opacity: 1;
+        transform: translateX(0);
+      }
 
-    /* Light (outline) badges — no hover effect at all */
-    .badge-light.animated:hover {
-      transform: translate(-50%, -50%) translateZ(0) scale(1);
-    }
+      /* Hover States — only subtle scale, no border/glow changes */
+      .badge.animated:hover {
+        transform: translate(-50%, -50%) translateZ(0) scale(1.05);
+        z-index: 1005;
+      }
 
-    /* Badge Icons styling */
-    .badge-icon {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: clamp(12px, 1.6cqw, 18px);
-      height: clamp(12px, 1.6cqw, 18px);
-      flex-shrink: 0;
-    }
+      /* Light (outline) badges — no hover effect at all */
+      .badge-light.animated:hover {
+        transform: translate(-50%, -50%) translateZ(0) scale(1);
+      }
 
-    /* Custom CSS rounded shape icons */
-    .icon-green-square {
-      width: 100%;
-      height: 100%;
-      background: #86efac;
-      border-radius: 3px;
-    }
-    
-    .icon-green-circle {
-      width: 85%;
-      height: 85%;
-      background: #22c55e;
-      border-radius: 50%;
-    }
+      /* Badge Icons styling */
+      .badge-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: clamp(12px, 1.6cqw, 18px);
+        height: clamp(12px, 1.6cqw, 18px);
+        flex-shrink: 0;
+      }
 
-    .icon-purple-square {
-      width: 100%;
-      height: 100%;
-      background: #c084fc;
-      border-radius: 3px;
-    }
+      /* Custom CSS rounded shape icons */
+      .icon-green-square {
+        width: 100%;
+        height: 100%;
+        background: #86efac;
+        border-radius: 3px;
+      }
 
-    /* Center Header Text Layout */
-    .center-header {
-      position: absolute;
-      left: 50%;
-      top: calc(var(--y) / 520 * 100%);
-      transform: translate(-50%, -50%);
-      text-align: center;
-      pointer-events: none;
-      z-index: 1;
-    }
+      .icon-green-circle {
+        width: 85%;
+        height: 85%;
+        background: #22c55e;
+        border-radius: 50%;
+      }
 
-    .center-header h1 {
-      font-size: clamp(16px, 2.5cqw, 26px);
-      font-weight: 500;
-      line-height: 1.25;
-      letter-spacing: -0.01em;
-      color: var(--text-main);
-      transition: color 0.4s ease;
-    }
+      .icon-purple-square {
+        width: 100%;
+        height: 100%;
+        background: #c084fc;
+        border-radius: 3px;
+      }
 
-    /* Opportunity & Scale Text styling */
-    .axis-label {
-      position: absolute;
-      top: calc(275 / 520 * 100%);
-      font-weight: 500;
-      font-size: clamp(12px, 1.6cqw, 16px);
-      color: var(--text-main);
-      transition: color 0.4s ease;
-      user-select: none;
-      pointer-events: none;
-    }
+      /* Center Header Text Layout */
+      .center-header {
+        position: absolute;
+        left: 50%;
+        top: calc(var(--y) / 520 * 100%);
+        transform: translate(-50%, -50%);
+        text-align: center;
+        pointer-events: none;
+        z-index: 1;
+      }
 
-    .axis-label-left {
-      left: calc(115 / 1000 * 100%);
-      transform: translate(-100%, -50%);
-      margin-left: -14px;
-      text-align: right;
-    }
+      .center-header h1 {
+        font-size: clamp(16px, 2.5cqw, 26px);
+        font-weight: 500;
+        line-height: 1.25;
+        letter-spacing: -0.01em;
+        color: var(--text-main);
+        transition: color 0.4s ease;
+      }
 
-    .axis-label-right {
-      left: calc(885 / 1000 * 100%);
-      transform: translate(0, -50%);
-      margin-left: 14px;
-      text-align: left;
-    }
+      /* Opportunity & Scale Text styling */
+      .axis-label {
+        position: absolute;
+        top: calc(275 / 520 * 100%);
+        font-weight: 500;
+        font-size: clamp(12px, 1.6cqw, 16px);
+        color: var(--text-main);
+        transition: color 0.4s ease;
+        user-select: none;
+        pointer-events: none;
+      }
 
-    /* =========================================================================
+      .axis-label-left {
+        left: calc(115 / 1000 * 100%);
+        transform: translate(-100%, -50%);
+        margin-left: -14px;
+        text-align: right;
+      }
+
+      .axis-label-right {
+        left: calc(885 / 1000 * 100%);
+        transform: translate(0, -50%);
+        margin-left: 14px;
+        text-align: left;
+      }
+
+      /* =========================================================================
        NATIVE SINGLE-SYSTEM INTRO ANIMATION (CSS Clip-Path + SVG Geometry)
        ========================================================================= */
-    /* Disable badge interaction during intro */
-    .diagram-wrapper:not(.intro-done) .badge {
-      pointer-events: none;
-    }
+      /* Disable badge interaction during intro */
+      .diagram-wrapper:not(.intro-done) .badge {
+        pointer-events: none;
+      }
 
-    /* Concentric circles spin and fade-in animation during intro */
-    .diagram-wrapper .circle-inner,
-    .diagram-wrapper .circle-outer {
-      opacity: 0;
-      transform-origin: 500px 275px;
-      transition: transform 2.1s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s ease;
-    }
-    .diagram-wrapper.animated .circle-inner {
-      opacity: 1;
-      transform: rotate(720deg);
-    }
-    .diagram-wrapper.animated .circle-outer {
-      opacity: 1;
-      transform: rotate(-720deg);
-    }
+      /* Concentric circles spin and fade-in animation during intro */
+      .diagram-wrapper .circle-inner,
+      .diagram-wrapper .circle-outer {
+        opacity: 0;
+        transform-origin: 500px 275px;
+        transition:
+          transform 2.1s cubic-bezier(0.25, 1, 0.5, 1),
+          opacity 0.4s ease;
+      }
+      .diagram-wrapper.animated .circle-inner {
+        opacity: 1;
+        transform: rotate(720deg);
+      }
+      .diagram-wrapper.animated .circle-outer {
+        opacity: 1;
+        transform: rotate(-720deg);
+      }
 
-    /* Horizontal Axis growing animation using standard CSS clip-path inset */
-    .line-horizontal {
-      clip-path: inset(0% 50% 0% 50%);
-      transition: clip-path 2.1s cubic-bezier(0.25, 1, 0.5, 1);
-    }
-    .diagram-wrapper.animated .line-horizontal {
-      clip-path: inset(0% 0% 0% 0%);
-    }
+      /* Horizontal Axis growing animation using standard CSS clip-path inset */
+      .line-horizontal {
+        clip-path: inset(0% 50% 0% 50%);
+        transition: clip-path 2.1s cubic-bezier(0.25, 1, 0.5, 1);
+      }
+      .diagram-wrapper.animated .line-horizontal {
+        clip-path: inset(0% 0% 0% 0%);
+      }
 
-    /* Opportunity & Scale Dots separating from center by transitioning cx & r directly in CSS */
-    .dot-opportunity,
-    .dot-scale {
-      mix-blend-mode: multiply;
-      opacity: 1;
-      fill: #18181b;
-      transition: cx 2.1s cubic-bezier(0.89, 0.34, 0.2, 0.83), r 2.1s cubic-bezier(0.89, 0.34, 0.2, 0.83);
-    }
-    .diagram-wrapper:not(.animated) .dot-opportunity {
-      cx: 500px;
-      r: 125px;
-    }
-    .diagram-wrapper:not(.animated) .dot-scale {
-      cx: 500px;
-      r: 125px;
-    }
-    .diagram-wrapper.animated .dot-opportunity {
-      cx: 115px;
-      r: 5.5px;
-    }
-    .diagram-wrapper.animated .dot-scale {
-      cx: 885px;
-      r: 5.5px;
-    }
+      /* Opportunity & Scale Dots separating from center by transitioning cx & r directly in CSS */
+      .dot-opportunity,
+      .dot-scale {
+        mix-blend-mode: multiply;
+        opacity: 1;
+        fill: #18181b;
+        transition:
+          cx 2.1s cubic-bezier(0.89, 0.34, 0.2, 0.83),
+          r 2.1s cubic-bezier(0.89, 0.34, 0.2, 0.83);
+      }
+      .diagram-wrapper:not(.animated) .dot-opportunity {
+        cx: 500px;
+        r: 125px;
+      }
+      .diagram-wrapper:not(.animated) .dot-scale {
+        cx: 500px;
+        r: 125px;
+      }
+      .diagram-wrapper.animated .dot-opportunity {
+        cx: 115px;
+        r: 5.5px;
+      }
+      .diagram-wrapper.animated .dot-scale {
+        cx: 885px;
+        r: 5.5px;
+      }
 
-    /* Axis text labels sliding out from center */
-    .axis-label {
-      top: calc(275 / 520 * 100%);
-      opacity: 0;
-      color: #fff;
-      transition: left 2.1s cubic-bezier(0.89, 0.34, 0.2, 0.83), transform 2.1s cubic-bezier(0.89, 0.34, 0.2, 0.83), opacity 1.8s ease, color 2.1s ease;
-    }
-    .axis-label-left {
-      left: 50%;
-      transform: translate(-50%, -50%);
-      margin-left: -14px;
-      text-align: right;
-    }
-    .axis-label-right {
-      left: 50%;
-      transform: translate(-50%, -50%);
-      margin-left: 14px;
-      text-align: left;
-    }
-    .diagram-wrapper.animated .axis-label-left {
-      left: calc(115 / 1000 * 100%);
-      transform: translate(-100%, -50%);
-      opacity: 1;
-      color: var(--text-main);
-    }
-    .diagram-wrapper.animated .axis-label-right {
-      left: calc(885 / 1000 * 100%);
-      transform: translate(0, -50%);
-      opacity: 1;
-      color: var(--text-main);
-    }
+      /* Axis text labels sliding out from center */
+      .axis-label {
+        top: calc(275 / 520 * 100%);
+        opacity: 0;
+        color: #fff;
+        transition:
+          left 2.1s cubic-bezier(0.89, 0.34, 0.2, 0.83),
+          transform 2.1s cubic-bezier(0.89, 0.34, 0.2, 0.83),
+          opacity 1.8s ease,
+          color 2.1s ease;
+      }
+      .axis-label-left {
+        left: 50%;
+        transform: translate(-50%, -50%);
+        margin-left: -14px;
+        text-align: right;
+      }
+      .axis-label-right {
+        left: 50%;
+        transform: translate(-50%, -50%);
+        margin-left: 14px;
+        text-align: left;
+      }
+      .diagram-wrapper.animated .axis-label-left {
+        left: calc(115 / 1000 * 100%);
+        transform: translate(-100%, -50%);
+        opacity: 1;
+        color: var(--text-main);
+      }
+      .diagram-wrapper.animated .axis-label-right {
+        left: calc(885 / 1000 * 100%);
+        transform: translate(0, -50%);
+        opacity: 1;
+        color: var(--text-main);
+      }
 
-    /* Center Header sliding up from center axis */
-    .center-header {
-      transition: top 2.1s cubic-bezier(0.89, 0.34, 0.2, 0.83), transform 2.1s cubic-bezier(0.89, 0.34, 0.2, 0.83);
-    }
-    .center-header h1 {
-      transition: color 2.1s ease;
-    }
-    .diagram-wrapper:not(.animated) .center-header {
-      top: calc(275 / 520 * 100%);
-      transform: translate(-50%, -50%) scale(1.25);
-    }
-    .diagram-wrapper:not(.animated) .center-header h1 {
-      color: #ffffff;
-    }
-    .diagram-wrapper.animated .center-header {
-      top: calc(85 / 520 * 100%);
-      transform: translate(-50%, -50%) scale(1);
-    }
-    .diagram-wrapper.animated .center-header h1 {
-      color: var(--text-main);
-    }
+      /* Center Header sliding up from center axis */
+      .center-header {
+        transition:
+          top 2.1s cubic-bezier(0.89, 0.34, 0.2, 0.83),
+          transform 2.1s cubic-bezier(0.89, 0.34, 0.2, 0.83);
+      }
+      .center-header h1 {
+        transition: color 2.1s ease;
+      }
+      .diagram-wrapper:not(.animated) .center-header {
+        top: calc(275 / 520 * 100%);
+        transform: translate(-50%, -50%) scale(1.25);
+      }
+      .diagram-wrapper:not(.animated) .center-header h1 {
+        color: #ffffff;
+      }
+      .diagram-wrapper.animated .center-header {
+        top: calc(85 / 520 * 100%);
+        transform: translate(-50%, -50%) scale(1);
+      }
+      .diagram-wrapper.animated .center-header h1 {
+        color: var(--text-main);
+      }
 
-    /* =========================================================================
+      /* =========================================================================
        BADGE HOVER VIDEO/ASSET CARD STYLING
        ========================================================================= */
-    .badge-dark .content {
-      opacity: 0;
-      visibility: hidden;
-      z-index: -1;
-      position: absolute;
-      bottom: 100%;
-      left: 50%;
-      transition: opacity 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), visibility 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-    }
-
-    @media (max-width: 768px) {
       .badge-dark .content {
-        visibility: hidden !important;
-        display: none !important;
+        opacity: 0;
+        visibility: hidden;
+        z-index: -1;
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transition:
+          opacity 0.4s cubic-bezier(0.25, 0.8, 0.25, 1),
+          visibility 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
       }
-    }
 
-    .badge-dark .content .asset {
-      background: #fff;
-      border-radius: 8px;
-      position: relative;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-    }
+      @media (max-width: 768px) {
+        .badge-dark .content {
+          visibility: hidden !important;
+          display: none !important;
+        }
+      }
 
-    .badge-dark .content .asset.asset1 {
-      z-index: 1;
-      width: 220px;
-      height: 165px;
-      transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-      transform: translate(-40px, 20px) scale(0.6) rotate(-24deg);
-    }
+      .badge-dark .content .asset {
+        background: #fff;
+        border-radius: 8px;
+        position: relative;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      }
 
-    .badge-dark .content .asset.asset2 {
-      z-index: 0;
-      opacity: 0;
-      width: 180px;
-      height: 135px;
-      transition:
-        transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1),
-        opacity 0.5s ease;
-      position: absolute;
-      top: -10px;
-      left: 110px;
-      transform: translate(-20px, 20px) scale(0.5) rotate(-8deg);
-    }
+      .badge-dark .content .asset.asset1 {
+        z-index: 1;
+        width: 220px;
+        height: 165px;
+        transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        transform: translate(-40px, 20px) scale(0.6) rotate(-24deg);
+      }
 
-    .badge-dark .content .asset.asset2:hover {
-      z-index: 2;
-      transform: scale(1.2) rotate(8deg) !important;
-    }
+      .badge-dark .content .asset.asset2 {
+        z-index: 0;
+        opacity: 0;
+        width: 180px;
+        height: 135px;
+        transition:
+          transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1),
+          opacity 0.5s ease;
+        position: absolute;
+        top: -10px;
+        left: 110px;
+        transform: translate(-20px, 20px) scale(0.5) rotate(-8deg);
+      }
 
-    .badge-dark .content .asset video {
-      border-radius: 8px;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
+      .badge-dark .content .asset.asset2:hover {
+        z-index: 2;
+        transform: scale(1.2) rotate(8deg) !important;
+      }
 
-    /* Reveal and animate assets on hover of the dark badge */
-    .badge-dark:hover .content {
-      opacity: 1;
-      visibility: visible;
-      z-index: 10;
-    }
+      .badge-dark .content .asset video {
+        border-radius: 8px;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
 
-    .badge-dark:hover .content .asset.asset1 {
-      transform: scale(1) rotate(-4deg) !important;
-    }
+      /* Reveal and animate assets on hover of the dark badge */
+      .badge-dark:hover .content {
+        opacity: 1;
+        visibility: visible;
+        z-index: 10;
+      }
 
-    .badge-dark:hover .content .asset.asset2 {
-      transform: rotate(8deg);
-      opacity: 1 !important;
-    }
-  </style>
-</head>
-<body>
-      <!-- The Diagram Wrapper -->
+      .badge-dark:hover .content .asset.asset1 {
+        transform: scale(1) rotate(-4deg) !important;
+      }
+
+      .badge-dark:hover .content .asset.asset2 {
+        transform: rotate(8deg);
+        opacity: 1 !important;
+      }
+      /* =========================================================================
+       MOBILE RESPONSIVENESS FIX
+       ========================================================================= */
+      @media (max-width: 768px) {
+        html, body {
+          overflow-x: hidden !important;
+          max-width: 100vw !important;
+        }
+
+        .diagram-wrapper {
+          width: 190% !important; /* Scale up coordinate system */
+          left: 50% !important;
+          transform: translateX(-50%) !important;
+          position: relative !important;
+          margin: 40px 0 !important;
+        }
+
+        /* Hide outline buttons, side text, and horizontal line to reduce clutter */
+        .diagram-wrapper .badge-light,
+        .diagram-wrapper .axis-label,
+        .diagram-wrapper .diagram-dot,
+        .diagram-wrapper .line-horizontal {
+          display: none !important;
+        }
+
+        /* Keep header text size reasonable */
+        .center-header h1 {
+          font-size: 16px !important;
+        }
+
+        /* Ensure badges are readable inside the 190% scaled wrapper */
+        .badge {
+          font-size: 13px !important;
+          padding: 8px 14px !important;
+          gap: 6px !important;
+        }
+
+        .badge-dark {
+          padding: 8px 14px !important;
+        }
+
+        .badge-icon {
+          width: 14px !important;
+          height: 14px !important;
+        }
+
+        /* Ensure text doesn't overflow the badge heavily on mobile */
+        .badge-dark .badge-text {
+          transform: translateX(16px);
+        }
+        .badge-dark.expanded .badge-text {
+          transform: translateX(0);
+        }
+
+        /* Shift specific badges to avoid overlap on mobile */
+        /* Website Design (was y:200, shift up slightly) */
+        .diagram-wrapper .badge-dark:nth-child(5) {
+          --y: 175 !important;
+        }
+        /* Conversion Optimization (was y:310, shift down to center row) */
+        .diagram-wrapper .badge-dark:nth-child(9) {
+          --y: 375 !important;
+        }
+        /* Google Ads (was y:375, shift further down) */
+        .diagram-wrapper .badge-dark:nth-child(11) {
+          --y: 440 !important;
+        }
+        /* Lead Generation (was y:375, shift further down) */
+        .diagram-wrapper .badge-dark:nth-child(12) {
+          --y: 440 !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- The Diagram Wrapper -->
     <div class="diagram-wrapper">
-      
       <!-- SVG Lines and Tracks Background -->
       <svg class="diagram-svg" viewBox="0 0 1000 520">
         <!-- Main Horizontal Axis -->
-        <line class="diagram-line line-horizontal" x1="115" y1="275" x2="885" y2="275" />
+        <line
+          class="diagram-line line-horizontal"
+          x1="115"
+          y1="275"
+          x2="885"
+          y2="275"
+        />
 
         <!-- Concentric Circles -->
         <!-- Inner Circle R=125 -->
@@ -489,292 +583,499 @@
       <div class="axis-label axis-label-right">Scale</div>
 
       <!-- Center Title -->
-      <div class="center-header" style="--y: 85;">
-        <h1>The Growth<br>Core</h1>
+      <div class="center-header" style="--y: 85">
+        <h1>The Growth<br />Core</h1>
       </div>
 
       <!-- ================== BADGES ================== -->
 
       <!-- Inner Circle Badges (Dark) -->
-      
+
       <!-- Website Design -->
-      <div class="badge badge-dark" style="--x: 500; --y: 200;" data-target-circle="inner">
+      <div
+        class="badge badge-dark"
+        style="--x: 500; --y: 200"
+        data-target-circle="inner"
+      >
         <span class="badge-icon">
           <span class="icon-green-square"></span>
         </span>
         <span class="badge-text">Website Design</span>
-        
+
         <div class="content">
           <div class="asset asset1">
-            <video class="video1" preload="metadata" loading="lazy" playsinline="" loop="" muted="" src="https://www.datocms-assets.com/22695/1724731888-web-01-mozilla-labs.mp4"></video>
+            <video
+              class="video1"
+              preload="metadata"
+              loading="lazy"
+              playsinline=""
+              loop=""
+              muted=""
+              src="https://www.datocms-assets.com/22695/1724731888-web-01-mozilla-labs.mp4"
+            ></video>
           </div>
           <div class="asset asset2">
-            <video class="video2" preload="metadata" loading="lazy" playsinline="" loop="" muted="" src="https://www.datocms-assets.com/22695/1724731867-web-02-clearbit.mp4"></video>
+            <video
+              class="video2"
+              preload="metadata"
+              loading="lazy"
+              playsinline=""
+              loop=""
+              muted=""
+              src="https://www.datocms-assets.com/22695/1724731867-web-02-clearbit.mp4"
+            ></video>
           </div>
         </div>
       </div>
 
       <!-- AI Search -->
-      <div class="badge badge-dark" style="--x: 395; --y: 245;" data-target-circle="inner">
+      <div
+        class="badge badge-dark"
+        style="--x: 395; --y: 245"
+        data-target-circle="inner"
+      >
         <span class="badge-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5">
-            <path d="M12 2L15 9L22 12L15 15L12 22L9 15L2 12L9 9Z" fill="#60a5fa"/>
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#60a5fa"
+            stroke-width="2.5"
+          >
+            <path
+              d="M12 2L15 9L22 12L15 15L12 22L9 15L2 12L9 9Z"
+              fill="#60a5fa"
+            />
           </svg>
         </span>
         <span class="badge-text">AI Search</span>
-        
+
         <div class="content">
           <div class="asset asset1">
-            <video class="video1" preload="metadata" loading="lazy" playsinline="" loop="" muted="" src="https://www.datocms-assets.com/22695/1724732017-app-design-01-turo.mp4"></video>
+            <video
+              class="video1"
+              preload="metadata"
+              loading="lazy"
+              playsinline=""
+              loop=""
+              muted=""
+              src="https://www.datocms-assets.com/22695/1724732017-app-design-01-turo.mp4"
+            ></video>
           </div>
           <div class="asset asset2">
-            <video class="video2" preload="metadata" loading="lazy" playsinline="" loop="" muted="" src="https://www.datocms-assets.com/22695/1724731996-app-design-02-tile.mp4"></video>
+            <video
+              class="video2"
+              preload="metadata"
+              loading="lazy"
+              playsinline=""
+              loop=""
+              muted=""
+              src="https://www.datocms-assets.com/22695/1724731996-app-design-02-tile.mp4"
+            ></video>
           </div>
         </div>
       </div>
 
       <!-- SEO -->
-      <div class="badge badge-dark" style="--x: 605; --y: 245;" data-target-circle="inner">
+      <div
+        class="badge badge-dark"
+        style="--x: 605; --y: 245"
+        data-target-circle="inner"
+      >
         <span class="badge-icon">
           <span class="icon-green-circle"></span>
         </span>
         <span class="badge-text">SEO</span>
-        
+
         <div class="content">
           <div class="asset asset1">
-            <video class="video1" preload="metadata" loading="lazy" playsinline="" loop="" muted="" src="https://www.datocms-assets.com/22695/1724731941-ux-01-ninox.mp4"></video>
+            <video
+              class="video1"
+              preload="metadata"
+              loading="lazy"
+              playsinline=""
+              loop=""
+              muted=""
+              src="https://www.datocms-assets.com/22695/1724731941-ux-01-ninox.mp4"
+            ></video>
           </div>
           <div class="asset asset2">
-            <video class="video2" preload="metadata" loading="lazy" playsinline="" loop="" muted="" src="https://www.datocms-assets.com/22695/1724731913-ux-02-nbcuniversal.mp4"></video>
+            <video
+              class="video2"
+              preload="metadata"
+              loading="lazy"
+              playsinline=""
+              loop=""
+              muted=""
+              src="https://www.datocms-assets.com/22695/1724731913-ux-02-nbcuniversal.mp4"
+            ></video>
           </div>
         </div>
       </div>
 
       <!-- Meta Ads -->
-      <div class="badge badge-dark" style="--x: 335; --y: 310;" data-target-circle="inner">
+      <div
+        class="badge badge-dark"
+        style="--x: 335; --y: 310"
+        data-target-circle="inner"
+      >
         <span class="badge-icon">
           <svg viewBox="0 0 24 24" fill="#f472b6">
-            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            <path
+              d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+            />
           </svg>
         </span>
         <span class="badge-text">Meta Ads</span>
-        
+
         <div class="content">
           <div class="asset asset1">
-            <video class="video1" preload="metadata" loading="lazy" playsinline="" loop="" muted="" src="https://www.datocms-assets.com/22695/1724732054-branding-01-descript.mp4"></video>
+            <video
+              class="video1"
+              preload="metadata"
+              loading="lazy"
+              playsinline=""
+              loop=""
+              muted=""
+              src="https://www.datocms-assets.com/22695/1724732054-branding-01-descript.mp4"
+            ></video>
           </div>
           <div class="asset asset2">
-            <video class="video2" preload="metadata" loading="lazy" playsinline="" loop="" muted="" src="https://www.datocms-assets.com/22695/1724732074-branding-02-firefox.mp4"></video>
+            <video
+              class="video2"
+              preload="metadata"
+              loading="lazy"
+              playsinline=""
+              loop=""
+              muted=""
+              src="https://www.datocms-assets.com/22695/1724732074-branding-02-firefox.mp4"
+            ></video>
           </div>
         </div>
       </div>
 
       <!-- Conversion Optimization -->
-      <div class="badge badge-dark" style="--x: 500; --y: 310;" data-target-circle="inner">
+      <div
+        class="badge badge-dark"
+        style="--x: 500; --y: 310"
+        data-target-circle="inner"
+      >
         <span class="badge-icon">
           <svg viewBox="0 0 24 24" fill="#fb923c">
             <polygon points="12,2 22,7.5 22,18.5 12,24 2,18.5 2,7.5" />
           </svg>
         </span>
         <span class="badge-text">Conversion Optimization</span>
-        
+
         <div class="content">
           <div class="asset asset1">
-            <video class="video1" preload="metadata" loading="lazy" playsinline="" loop="" muted="" src="https://www.datocms-assets.com/22695/1724731847-web-app-dev-01-emi-health.mp4"></video>
+            <video
+              class="video1"
+              preload="metadata"
+              loading="lazy"
+              playsinline=""
+              loop=""
+              muted=""
+              src="https://www.datocms-assets.com/22695/1724731847-web-app-dev-01-emi-health.mp4"
+            ></video>
           </div>
           <div class="asset asset2">
-            <video class="video2" preload="metadata" loading="lazy" playsinline="" loop="" muted="" src="https://www.datocms-assets.com/22695/1724731817-web-app-dev-02-vela.mp4"></video>
+            <video
+              class="video2"
+              preload="metadata"
+              loading="lazy"
+              playsinline=""
+              loop=""
+              muted=""
+              src="https://www.datocms-assets.com/22695/1724731817-web-app-dev-02-vela.mp4"
+            ></video>
           </div>
         </div>
       </div>
 
       <!-- Automation -->
-      <div class="badge badge-dark" style="--x: 665; --y: 310;" data-target-circle="inner">
+      <div
+        class="badge badge-dark"
+        style="--x: 665; --y: 310"
+        data-target-circle="inner"
+      >
         <span class="badge-icon">
           <svg viewBox="0 0 24 24" fill="#86efac">
             <polygon points="6,4 20,12 6,20" />
           </svg>
         </span>
         <span class="badge-text">Automation</span>
-        
+
         <div class="content">
           <div class="asset asset1">
-            <video class="video1" preload="metadata" loading="lazy" playsinline="" loop="" muted="" src="https://www.datocms-assets.com/22695/1724732097-design-systems-01-salesforce.mp4"></video>
+            <video
+              class="video1"
+              preload="metadata"
+              loading="lazy"
+              playsinline=""
+              loop=""
+              muted=""
+              src="https://www.datocms-assets.com/22695/1724732097-design-systems-01-salesforce.mp4"
+            ></video>
           </div>
           <div class="asset asset2">
-            <video class="video2" preload="metadata" loading="lazy" playsinline="" loop="" muted="" src="https://www.datocms-assets.com/22695/1731318532-design-systems-02-opswat.mp4"></video>
+            <video
+              class="video2"
+              preload="metadata"
+              loading="lazy"
+              playsinline=""
+              loop=""
+              muted=""
+              src="https://www.datocms-assets.com/22695/1731318532-design-systems-02-opswat.mp4"
+            ></video>
           </div>
         </div>
       </div>
 
       <!-- Google Ads -->
-      <div class="badge badge-dark" style="--x: 405; --y: 375;" data-target-circle="inner">
+      <div
+        class="badge badge-dark"
+        style="--x: 405; --y: 375"
+        data-target-circle="inner"
+      >
         <span class="badge-icon">
           <svg viewBox="0 0 24 24" fill="#fbbf24">
             <polygon points="12,3 22,21 2,21" />
           </svg>
         </span>
         <span class="badge-text">Google Ads</span>
-        
+
         <div class="content">
           <div class="asset asset1">
-            <video class="video1" preload="metadata" loading="lazy" playsinline="" loop="" muted="" src="https://www.datocms-assets.com/22695/1724731967-bp-video-strategy.mp4"></video>
+            <video
+              class="video1"
+              preload="metadata"
+              loading="lazy"
+              playsinline=""
+              loop=""
+              muted=""
+              src="https://www.datocms-assets.com/22695/1724731967-bp-video-strategy.mp4"
+            ></video>
           </div>
           <div class="asset asset2">
-            <video class="video2" preload="metadata" loading="lazy" playsinline="" loop="" muted="" src="https://www.datocms-assets.com/22695/1724731888-web-01-mozilla-labs.mp4"></video>
+            <video
+              class="video2"
+              preload="metadata"
+              loading="lazy"
+              playsinline=""
+              loop=""
+              muted=""
+              src="https://www.datocms-assets.com/22695/1724731888-web-01-mozilla-labs.mp4"
+            ></video>
           </div>
         </div>
       </div>
 
       <!-- Lead Generation -->
-      <div class="badge badge-dark" style="--x: 595; --y: 375;" data-target-circle="inner">
+      <div
+        class="badge badge-dark"
+        style="--x: 595; --y: 375"
+        data-target-circle="inner"
+      >
         <span class="badge-icon">
           <span class="icon-purple-square"></span>
         </span>
         <span class="badge-text">Lead Generation</span>
-        
+
         <div class="content">
           <div class="asset asset1">
-            <video class="video1" preload="metadata" loading="lazy" playsinline="" loop="" muted="" src="https://www.datocms-assets.com/22695/1724732017-app-design-01-turo.mp4"></video>
+            <video
+              class="video1"
+              preload="metadata"
+              loading="lazy"
+              playsinline=""
+              loop=""
+              muted=""
+              src="https://www.datocms-assets.com/22695/1724732017-app-design-01-turo.mp4"
+            ></video>
           </div>
           <div class="asset asset2">
-            <video class="video2" preload="metadata" loading="lazy" playsinline="" loop="" muted="" src="https://www.datocms-assets.com/22695/1724731817-web-app-dev-02-vela.mp4"></video>
+            <video
+              class="video2"
+              preload="metadata"
+              loading="lazy"
+              playsinline=""
+              loop=""
+              muted=""
+              src="https://www.datocms-assets.com/22695/1724731817-web-app-dev-02-vela.mp4"
+            ></video>
           </div>
         </div>
       </div>
 
-
       <!-- Outer Circle Badges (Light) -->
 
       <!-- Google Maps SEO -->
-      <div class="badge badge-light" style="--x: 310; --y: 190;" data-target-circle="outer">
+      <div
+        class="badge badge-light"
+        style="--x: 310; --y: 190"
+        data-target-circle="outer"
+      >
         Google Maps SEO
       </div>
 
       <!-- Reputation -->
-      <div class="badge badge-light" style="--x: 690; --y: 190;" data-target-circle="outer">
+      <div
+        class="badge badge-light"
+        style="--x: 690; --y: 190"
+        data-target-circle="outer"
+      >
         Reputation
       </div>
 
       <!-- Local Service Ads -->
-      <div class="badge badge-light" style="--x: 255; --y: 245;" data-target-circle="outer">
+      <div
+        class="badge badge-light"
+        style="--x: 255; --y: 245"
+        data-target-circle="outer"
+      >
         Local Service Ads
       </div>
 
       <!-- CRM & Pipeline Setup -->
-      <div class="badge badge-light" style="--x: 775; --y: 245;" data-target-circle="outer">
+      <div
+        class="badge badge-light"
+        style="--x: 775; --y: 245"
+        data-target-circle="outer"
+      >
         CRM & Pipeline Setup
       </div>
 
       <!-- Branding -->
-      <div class="badge badge-light" style="--x: 195; --y: 310;">
-        Branding
-      </div>
+      <div class="badge badge-light" style="--x: 195; --y: 310">Branding</div>
 
       <!-- Content -->
-      <div class="badge badge-light" style="--x: 275; --y: 370;" data-target-circle="outer">
+      <div
+        class="badge badge-light"
+        style="--x: 275; --y: 370"
+        data-target-circle="outer"
+      >
         Content
       </div>
 
       <!-- SMM -->
-      <div class="badge badge-light" style="--x: 805; --y: 310;">
-        SMM
-      </div>
+      <div class="badge badge-light" style="--x: 805; --y: 310">SMM</div>
 
       <!-- AI Call Handler -->
-      <div class="badge badge-light" style="--x: 775; --y: 370;" data-target-circle="outer">
+      <div
+        class="badge badge-light"
+        style="--x: 775; --y: 370"
+        data-target-circle="outer"
+      >
         AI Call Handler
       </div>
-
     </div>
 
-  <script>
-    // Video Playback Control on Hover
-    const badges = document.querySelectorAll('.badge');
-    badges.forEach(badge => {
-      const videos = badge.querySelectorAll('video');
-      if (videos.length > 0) {
-        badge.addEventListener('mouseenter', () => {
-          videos.forEach(video => {
-            video.play().catch(err => console.log('Video play prevented:', err));
+    <script>
+      // Video Playback Control on Hover
+      const badges = document.querySelectorAll(".badge");
+      badges.forEach((badge) => {
+        const videos = badge.querySelectorAll("video");
+        if (videos.length > 0) {
+          badge.addEventListener("mouseenter", () => {
+            videos.forEach((video) => {
+              video
+                .play()
+                .catch((err) => console.log("Video play prevented:", err));
+            });
           });
-        });
-        badge.addEventListener('mouseleave', () => {
-          videos.forEach(video => {
-            video.pause();
-            video.currentTime = 0;
+          badge.addEventListener("mouseleave", () => {
+            videos.forEach((video) => {
+              video.pause();
+              video.currentTime = 0;
+            });
           });
-        });
-      }
-    });
-
-    // Animation runs only when diagram enters the viewport
-    function runAnimation(diagramWrapper) {
-      const allBadges   = Array.from(diagramWrapper.querySelectorAll('.badge'));
-      const darkBadges  = allBadges.filter(b => b.classList.contains('badge-dark'));
-      const lightBadges = allBadges.filter(b => b.classList.contains('badge-light'));
-      const STAGGER = 100;
-      const EXPAND_DELAY = 500;
-
-      // Pre-shift dark badge icons to icon-only position before they pop in
-      darkBadges.forEach(badge => {
-        const iconEl = badge.querySelector('.badge-icon');
-        if (!iconEl) return;
-        const styles = getComputedStyle(badge);
-        const shift  = Math.max(0, (badge.offsetWidth - 20) - (parseFloat(styles.paddingLeft)||10) - iconEl.offsetWidth/2);
-        iconEl.style.transition = 'none';
-        iconEl.style.transform  = 'translateX(' + shift + 'px)';
-        requestAnimationFrame(() => { iconEl.style.transition = ''; });
+        }
       });
 
-      // Step 1 (500ms): Diagram intro — line grows, circles spin, dots separate
-      setTimeout(() => {
-        diagramWrapper.classList.add('animated');
-      }, 500);
+      // Animation runs only when diagram enters the viewport
+      function runAnimation(diagramWrapper) {
+        const allBadges = Array.from(diagramWrapper.querySelectorAll(".badge"));
+        const darkBadges = allBadges.filter((b) =>
+          b.classList.contains("badge-dark"),
+        );
+        const lightBadges = allBadges.filter((b) =>
+          b.classList.contains("badge-light"),
+        );
+        const STAGGER = 100;
+        const EXPAND_DELAY = 500;
 
-      // Step 2 (2600ms): Intro done — interaction unlocked
-      setTimeout(() => {
-        diagramWrapper.classList.add('intro-done');
-      }, 2600);
-
-      // Step 3 (2900ms): Dark featured badges pop in first
-      setTimeout(() => {
-        darkBadges.forEach((badge, i) => {
-          setTimeout(() => {
-            badge.classList.add('animated');
-            setTimeout(() => badge.classList.add('expanded'), EXPAND_DELAY);
-          }, i * STAGGER);
+        // Pre-shift dark badge icons to icon-only position before they pop in
+        darkBadges.forEach((badge) => {
+          const iconEl = badge.querySelector(".badge-icon");
+          if (!iconEl) return;
+          const styles = getComputedStyle(badge);
+          const shift = Math.max(
+            0,
+            badge.offsetWidth -
+              20 -
+              (parseFloat(styles.paddingLeft) || 10) -
+              iconEl.offsetWidth / 2,
+          );
+          iconEl.style.transition = "none";
+          iconEl.style.transform = "translateX(" + shift + "px)";
+          requestAnimationFrame(() => {
+            iconEl.style.transition = "";
+          });
         });
 
-        // Step 4: Light outline badges appear after dark badges settle
-        const darkDelay = darkBadges.length * STAGGER + 400;
+        // Step 1 (500ms): Diagram intro — line grows, circles spin, dots separate
         setTimeout(() => {
-          lightBadges.forEach((badge, i) => setTimeout(() => badge.classList.add('animated'), i * STAGGER));
-        }, darkDelay);
-      }, 2900);
-    }
+          diagramWrapper.classList.add("animated");
+        }, 500);
 
-    function initObserver() {
-      const diagramWrapper = document.querySelector('.diagram-wrapper');
-      if (!diagramWrapper) return;
+        // Step 2 (2600ms): Intro done — interaction unlocked
+        setTimeout(() => {
+          diagramWrapper.classList.add("intro-done");
+        }, 2600);
 
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            observer.unobserve(diagramWrapper); // fire once only
-            runAnimation(diagramWrapper);
-          }
-        });
-      }, { threshold: 0.2 }); // start when 20% of diagram is visible
+        // Step 3 (2900ms): Dark featured badges pop in first
+        setTimeout(() => {
+          darkBadges.forEach((badge, i) => {
+            setTimeout(() => {
+              badge.classList.add("animated");
+              setTimeout(() => badge.classList.add("expanded"), EXPAND_DELAY);
+            }, i * STAGGER);
+          });
 
-      observer.observe(diagramWrapper);
-    }
+          // Step 4: Light outline badges appear after dark badges settle
+          const darkDelay = darkBadges.length * STAGGER + 400;
+          setTimeout(() => {
+            lightBadges.forEach((badge, i) =>
+              setTimeout(() => badge.classList.add("animated"), i * STAGGER),
+            );
+          }, darkDelay);
+        }, 2900);
+      }
 
-    if (document.readyState !== 'loading') {
-      initObserver();
-    } else {
-      document.addEventListener('DOMContentLoaded', initObserver);
-    }
-  </script>
-</body>
+      function initObserver() {
+        const diagramWrapper = document.querySelector(".diagram-wrapper");
+        if (!diagramWrapper) return;
+
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                observer.unobserve(diagramWrapper); // fire once only
+                runAnimation(diagramWrapper);
+              }
+            });
+          },
+          { threshold: 0.2 },
+        ); // start when 20% of diagram is visible
+
+        observer.observe(diagramWrapper);
+      }
+
+      if (document.readyState !== "loading") {
+        initObserver();
+      } else {
+        document.addEventListener("DOMContentLoaded", initObserver);
+      }
+    </script>
+  </body>
 </html>
